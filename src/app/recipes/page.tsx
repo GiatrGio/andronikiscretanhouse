@@ -1,0 +1,17 @@
+import { Metadata } from "next";
+import RecipesContent from "./RecipesContent";
+
+export const metadata: Metadata = {
+  title: "Greek Traditional Recipes",
+  description:
+    "Explore authentic Cretan recipes including moussaka, traditional bread, homemade cheeses, and preserves. Learn the flavors of Mediterranean cuisine.",
+  openGraph: {
+    title: "Greek Traditional Recipes | Androniki's Cretan House",
+    description:
+      "Explore authentic Cretan recipes from our cooking classes.",
+  },
+};
+
+export default function RecipesPage() {
+  return <RecipesContent />;
+}
