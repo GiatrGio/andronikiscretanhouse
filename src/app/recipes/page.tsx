@@ -1,5 +1,6 @@
 import { Metadata } from "next";
 import RecipesContent from "./RecipesContent";
+import { getAllRecipes } from "@/lib/recipes";
 
 export const metadata: Metadata = {
   title: "Greek Traditional Recipes",
@@ -12,6 +13,8 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RecipesPage() {
-  return <RecipesContent />;
+export default async function RecipesPage() {
+  const recipes = await getAllRecipes();
+
+  return <RecipesContent recipes={recipes} />;
 }

@@ -1,11 +1,11 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, ChefHat, Filter, X } from "lucide-react";
-import { RECIPES } from "@/lib/constants";
+import { Clock, ChefHat, Filter } from "lucide-react";
+import { RecipeSummary } from "@/lib/constants";
 import Button from "@/components/ui/Button";
-import Modal from "@/components/ui/Modal";
 
 const categories = [
   "All",
@@ -22,16 +22,17 @@ const difficultyColors = {
   Hard: "bg-red-100 text-red-800",
 };
 
-export default function RecipesContent() {
+interface RecipesContentProps {
+  recipes: RecipeSummary[];
+}
+
+export default function RecipesContent({ recipes }: RecipesContentProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedRecipe, setSelectedRecipe] = useState<
-    (typeof RECIPES)[0] | null
-  >(null);
 
   const filteredRecipes =
     selectedCategory === "All"
-      ? RECIPES
-      : RECIPES.filter((recipe) => recipe.category === selectedCategory);
+      ? recipes
+      : recipes.filter((recipe) => recipe.category === selectedCategory);
 
   return (
     <div className="bg-[var(--color-cream)]">
@@ -97,24 +98,24 @@ export default function RecipesContent() {
                   exit={{ opacity: 0, scale: 0.9 }}
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
-                  <button
-                    onClick={() => setSelectedRecipe(recipe)}
-                    className="w-full text-left bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
+                  <Link
+                    href={`/recipes/${recipe.slug}`}
+                    className="block bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
                   >
                     <div className="relative aspect-[4/3] bg-[var(--color-primary)]/10 flex items-center justify-center">
                       <ChefHat className="w-16 h-16 text-[var(--color-primary)]/30 group-hover:scale-110 transition-transform" />
                     </div>
                     <div className="p-5">
                       <h3 className="font-heading text-lg font-bold text-[var(--color-charcoal)] mb-2 group-hover:text-[var(--color-primary)] transition-colors">
-                        {recipe.name}
+                        {recipe.title}
                       </h3>
                       <p className="text-sm text-[var(--color-charcoal-light)] mb-4 line-clamp-2">
-                        {recipe.description}
+                        {recipe.summary}
                       </p>
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1 text-sm text-[var(--color-charcoal-light)]">
                           <Clock className="w-4 h-4" />
-                          {recipe.prepTime}
+                          {recipe.preparation_time}
                         </div>
                         <span
                           className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -127,7 +128,7 @@ export default function RecipesContent() {
                         </span>
                       </div>
                     </div>
-                  </button>
+                  </Link>
                 </motion.div>
               ))}
             </AnimatePresence>
@@ -142,65 +143,6 @@ export default function RecipesContent() {
           )}
         </div>
       </section>
-
-      {/* Recipe Modal */}
-      <Modal
-        isOpen={!!selectedRecipe}
-        onClose={() => setSelectedRecipe(null)}
-        title={selectedRecipe?.name}
-        className="bg-white rounded-xl max-w-2xl w-full"
-      >
-        {selectedRecipe && (
-          <div className="p-6">
-            <div className="relative aspect-video bg-[var(--color-primary)]/10 rounded-lg mb-6 flex items-center justify-center">
-              <ChefHat className="w-20 h-20 text-[var(--color-primary)]/30" />
-            </div>
-
-            <div className="flex items-center gap-4 mb-4">
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  difficultyColors[
-                    selectedRecipe.difficulty as keyof typeof difficultyColors
-                  ]
-                }`}
-              >
-                {selectedRecipe.difficulty}
-              </span>
-              <div className="flex items-center gap-1 text-sm text-[var(--color-charcoal-light)]">
-                <Clock className="w-4 h-4" />
-                {selectedRecipe.prepTime}
-              </div>
-              <span className="text-sm text-[var(--color-charcoal-light)]">
-                {selectedRecipe.category}
-              </span>
-            </div>
-
-            <p className="text-[var(--color-charcoal-light)] mb-6">
-              {selectedRecipe.description}
-            </p>
-
-            <div className="bg-[var(--color-cream)] rounded-lg p-4 mb-6">
-              <p className="text-[var(--color-charcoal)] text-center">
-                Want to learn how to make this dish? Join us for a cooking class
-                and we'll teach you the authentic techniques and secrets!
-              </p>
-            </div>
-
-            <div className="flex gap-4">
-              <Button href="/contact" className="flex-1">
-                Book a Class
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setSelectedRecipe(null)}
-                className="flex-1"
-              >
-                Close
-              </Button>
-            </div>
-          </div>
-        )}
-      </Modal>
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 bg-[var(--color-secondary)]">

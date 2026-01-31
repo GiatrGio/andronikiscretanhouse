@@ -1,0 +1,67 @@
+{
+  "id": 1,
+  "slug": "traditional-moussaka",
+  "main_photo": "/images/recipes/moussaka-main.jpg",
+  "title": "Traditional Moussaka",
+  "summary": "Layers of eggplant, spiced meat sauce, and creamy bechamel, baked to perfection.",
+  "preparation_time": "90 min",
+  "serves": "6-8",
+  "difficulty": "Medium",
+  "category": "Main Courses",
+  "ingredients": [
+    {
+      "group": "For the Eggplant Layer",
+      "items": [
+        "3 large eggplants, sliced into 1/2 inch rounds",
+        "1/2 cup olive oil",
+        "Salt to taste"
+      ]
+    },
+    {
+      "group": "For the Meat Sauce",
+      "items": [
+        "2 lbs ground lamb or beef",
+        "1 large onion, finely chopped",
+        "3 cloves garlic, minced",
+        "1 can (14 oz) crushed tomatoes",
+        "2 tbsp tomato paste",
+        "1/2 cup red wine",
+        "1 tsp cinnamon",
+        "1/2 tsp nutmeg",
+        "2 bay leaves",
+        "Salt and pepper to taste"
+      ]
+    },
+    {
+      "group": "For the Bechamel Sauce",
+      "items": [
+        "6 tbsp butter",
+        "1/2 cup all-purpose flour",
+        "4 cups whole milk, warmed",
+        "3 egg yolks",
+        "1 cup grated kefalotyri or parmesan cheese",
+        "Pinch of nutmeg"
+      ]
+    }
+  ],
+  "instructions": [
+    {"step": 1, "type": "text", "value": "Preheat oven to 375°F (190°C). Brush eggplant slices with olive oil and arrange on baking sheets. Sprinkle with salt and bake for 20 minutes until golden. Set aside."},
+    {"step": 1, "type": "photo", "value": "/images/recipes/moussaka-step1.jpg"},
+    {"step": 2, "type": "text", "value": "In a large pan, brown the ground meat over medium-high heat. Add onions and garlic, cook until softened."},
+    {"step": 3, "type": "text", "value": "Add tomatoes, tomato paste, wine, cinnamon, nutmeg, and bay leaves. Simmer for 30 minutes until sauce thickens. Season with salt and pepper."},
+    {"step": 3, "type": "photo", "value": "/images/recipes/moussaka-step3-1.jpg"},
+    {"step": 3, "type": "photo", "value": "/images/recipes/moussaka-step3-2.jpg"},
+    {"step": 4, "type": "text", "value": "For the bechamel, melt butter in a saucepan. Whisk in flour and cook for 2 minutes. Gradually add warm milk, whisking constantly until smooth and thick."},
+    {"step": 5, "type": "text", "value": "Remove from heat. Whisk egg yolks in a bowl, then slowly add some hot bechamel to temper. Pour egg mixture back into the sauce, add cheese and nutmeg. Stir well."},
+    {"step": 6, "type": "text", "value": "In a 9x13 inch baking dish, layer half the eggplant, then all the meat sauce, then remaining eggplant. Pour bechamel over the top, spreading evenly."},
+    {"step": 6, "type": "photo", "value": "/images/recipes/moussaka-step6-1.jpg"},
+    {"step": 6, "type": "photo", "value": "/images/recipes/moussaka-step6-2.jpg"},
+    {"step": 7, "type": "text", "value": "Bake for 45 minutes until golden brown and bubbling. Let rest for 15 minutes before cutting and serving."},
+    {"step": 7, "type": "photo", "value": "/images/recipes/moussaka-step7.jpg"}
+  ],
+  "tips_and_notes": [
+    "Salting the eggplant before baking helps remove bitterness and excess moisture",
+    "Make the meat sauce a day ahead for deeper flavors",
+    "Let the moussaka rest after baking so it sets properly and is easier to slice"
+  ]
+}

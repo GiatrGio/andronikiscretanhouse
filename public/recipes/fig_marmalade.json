@@ -1,0 +1,42 @@
+{
+  "id": 6,
+  "slug": "fig-marmalade",
+  "main_photo": "/images/recipes/fig-marmalade-main.jpg",
+  "title": "Fig Marmalade",
+  "summary": "Rich, sweet marmalade made from ripe Cretan figs.",
+  "preparation_time": "50 min",
+  "serves": "4 cups",
+  "difficulty": "Easy",
+  "category": "Preserves",
+  "ingredients": [
+    {
+      "items": [
+        "2 lbs fresh figs, stemmed and quartered",
+        "3 cups sugar",
+        "1/2 cup water",
+        "1/4 cup lemon juice",
+        "1 tsp vanilla extract",
+        "Pinch of salt"
+      ]
+    }
+  ],
+  "instructions": [
+    {"step": 1, "type": "text", "value": "Place figs in a large, heavy-bottomed pot with water and lemon juice."},
+    {"step": 2, "type": "text", "value": "Bring to a boil over medium-high heat, then reduce to a simmer. Cook for 10 minutes, stirring occasionally."},
+    {"step": 2, "type": "photo", "value": "/images/recipes/fig-step2.jpg"},
+    {"step": 3, "type": "text", "value": "Add sugar and salt. Stir until sugar is completely dissolved."},
+    {"step": 4, "type": "text", "value": "Increase heat to medium-high and cook for 15-20 minutes, stirring frequently to prevent sticking."},
+    {"step": 5, "type": "text", "value": "The mixture will thicken and become glossy. For a smoother texture, mash some of the figs with a potato masher."},
+    {"step": 5, "type": "photo", "value": "/images/recipes/fig-step5-1.jpg"},
+    {"step": 5, "type": "photo", "value": "/images/recipes/fig-step5-2.jpg"},
+    {"step": 6, "type": "text", "value": "Stir in vanilla extract. Test consistency on a cold plate."},
+    {"step": 7, "type": "text", "value": "When ready, remove from heat and let cool for 5 minutes."},
+    {"step": 8, "type": "text", "value": "Pour into sterilized jars, leaving 1/4 inch headspace. Seal and process if desired."},
+    {"step": 8, "type": "photo", "value": "/images/recipes/fig-step8.jpg"}
+  ],
+  "tips_and_notes": [
+    "Use ripe but firm figs for the best flavor and texture",
+    "Add a cinnamon stick or star anise while cooking for extra warmth",
+    "This marmalade is perfect with cheese and crackers"
+  ]
+}

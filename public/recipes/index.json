@@ -1,0 +1,84 @@
+{
+  "recipes": [
+    {
+      "id": 1,
+      "slug": "traditional-moussaka",
+      "title": "Traditional Moussaka",
+      "summary": "Layers of eggplant, spiced meat sauce, and creamy bechamel, baked to perfection.",
+      "preparation_time": "90 min",
+      "difficulty": "Medium",
+      "category": "Main Courses",
+      "main_photo": "/images/recipes/moussaka-main.jpg"
+    },
+    {
+      "id": 2,
+      "slug": "wood-oven-bread",
+      "title": "Wood Oven Bread",
+      "summary": "Crusty artisan bread baked in our traditional wood-fired oven.",
+      "preparation_time": "180 min",
+      "difficulty": "Easy",
+      "category": "Breads",
+      "main_photo": "/images/recipes/bread-main.jpg"
+    },
+    {
+      "id": 3,
+      "slug": "homemade-cheese",
+      "title": "Homemade Cheese",
+      "summary": "Fresh, creamy cheese made using traditional Cretan methods.",
+      "preparation_time": "60 min",
+      "difficulty": "Medium",
+      "category": "Appetizers",
+      "main_photo": "/images/recipes/cheese-main.jpg"
+    },
+    {
+      "id": 4,
+      "slug": "orange-jam",
+      "title": "Orange Jam",
+      "summary": "Sweet and tangy preserve made from local Cretan oranges.",
+      "preparation_time": "45 min",
+      "difficulty": "Easy",
+      "category": "Preserves",
+      "main_photo": "/images/recipes/orange-jam-main.jpg"
+    },
+    {
+      "id": 5,
+      "slug": "quince-jelly",
+      "title": "Quince Jelly",
+      "summary": "Delicate jelly with the subtle sweetness of fresh quince fruit.",
+      "preparation_time": "60 min",
+      "difficulty": "Medium",
+      "category": "Preserves",
+      "main_photo": "/images/recipes/quince-jelly-main.jpg"
+    },
+    {
+      "id": 6,
+      "slug": "fig-marmalade",
+      "title": "Fig Marmalade",
+      "summary": "Rich, sweet marmalade made from ripe Cretan figs.",
+      "preparation_time": "50 min",
+      "difficulty": "Easy",
+      "category": "Preserves",
+      "main_photo": "/images/recipes/fig-marmalade-main.jpg"
+    },
+    {
+      "id": 7,
+      "slug": "vanilla-marmalade",
+      "title": "Vanilla Marmalade",
+      "summary": "Fragrant vanilla-infused preserve, perfect for breakfast.",
+      "preparation_time": "40 min",
+      "difficulty": "Easy",
+      "category": "Preserves",
+      "main_photo": "/images/recipes/vanilla-marmalade-main.jpg"
+    },
+    {
+      "id": 8,
+      "slug": "dakos-salad",
+      "title": "Dakos Salad",
+      "summary": "Traditional Cretan salad with barley rusks, tomatoes, and mizithra cheese.",
+      "preparation_time": "15 min",
+      "difficulty": "Easy",
+      "category": "Appetizers",
+      "main_photo": "/images/recipes/dakos-salad-main.jpg"
+    }
+  ]
+}
