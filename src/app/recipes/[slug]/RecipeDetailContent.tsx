@@ -60,9 +60,22 @@ export default function RecipeDetailContent({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative aspect-[16/9] bg-[var(--color-primary)]/10 rounded-2xl overflow-hidden mb-8 flex items-center justify-center"
+            className="relative aspect-[16/9] bg-[var(--color-primary)]/10 rounded-2xl overflow-hidden mb-8"
           >
-            <ChefHat className="w-24 h-24 text-[var(--color-primary)]/30" />
+            {recipe.main_photo ? (
+              <Image
+                src={recipe.main_photo}
+                alt={recipe.title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 896px"
+                priority
+              />
+            ) : (
+              <div className="absolute inset-0 flex items-center justify-center">
+                <ChefHat className="w-24 h-24 text-[var(--color-primary)]/30" />
+              </div>
+            )}
           </motion.div>
 
           {/* Recipe Title and Meta */}
@@ -212,11 +225,15 @@ export default function RecipeDetailContent({
                                   onClick={() => setLightboxImage(photo)}
                                   className="relative aspect-[4/3] bg-[var(--color-primary)]/10 rounded-lg overflow-hidden hover:opacity-90 transition-opacity cursor-pointer group"
                                 >
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <ChefHat className="w-12 h-12 text-[var(--color-primary)]/30" />
-                                  </div>
+                                  <Image
+                                    src={photo}
+                                    alt={`Step ${stepNum} - Photo ${imgIndex + 1}`}
+                                    fill
+                                    className="object-cover"
+                                    sizes="(max-width: 768px) 100vw, 50vw"
+                                  />
                                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-                                    <span className="text-white/0 group-hover:text-white/90 text-sm font-medium transition-all">
+                                    <span className="text-white/0 group-hover:text-white/90 text-sm font-medium transition-all drop-shadow-lg">
                                       Click to enlarge
                                     </span>
                                   </div>

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { Clock, ChefHat, Filter } from "lucide-react";
 import { RecipeSummary } from "@/lib/constants";
@@ -102,8 +103,20 @@ export default function RecipesContent({ recipes }: RecipesContentProps) {
                     href={`/recipes/${recipe.slug}`}
                     className="block bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
                   >
-                    <div className="relative aspect-[4/3] bg-[var(--color-primary)]/10 flex items-center justify-center">
-                      <ChefHat className="w-16 h-16 text-[var(--color-primary)]/30 group-hover:scale-110 transition-transform" />
+                    <div className="relative aspect-[4/3] bg-[var(--color-primary)]/10 overflow-hidden">
+                      {recipe.main_photo ? (
+                        <Image
+                          src={recipe.main_photo}
+                          alt={recipe.title}
+                          fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
+                          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 25vw"
+                        />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <ChefHat className="w-16 h-16 text-[var(--color-primary)]/30 group-hover:scale-110 transition-transform" />
+                        </div>
+                      )}
                     </div>
                     <div className="p-5">
                       <h3 className="font-heading text-lg font-bold text-[var(--color-charcoal)] mb-2 group-hover:text-[var(--color-primary)] transition-colors">

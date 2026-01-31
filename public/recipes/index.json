@@ -79,6 +79,36 @@
       "difficulty": "Easy",
       "category": "Appetizers",
       "main_photo": "/images/recipes/dakos-salad-main.jpg"
+    },
+    {
+      "id": 9,
+      "slug": "test-recipe",
+      "title": "Test recipe",
+      "summary": "Test Summary",
+      "preparation_time": "30",
+      "difficulty": "Medium",
+      "category": "Main courses",
+      "main_photo": "/images/recipes/test-recipe-main.jpg"
+    },
+    {
+      "id": 10,
+      "slug": "recipe-test-photos",
+      "title": "Recipe test photos",
+      "summary": "Recipe test photos summary",
+      "preparation_time": "45",
+      "difficulty": "Medium",
+      "category": "Main courses",
+      "main_photo": "/images/recipes/recipe-test-photos/main.jpg"
+    },
+    {
+      "id": 11,
+      "slug": "ds",
+      "title": "ds",
+      "summary": "fdsads",
+      "preparation_time": "43",
+      "difficulty": "Easy",
+      "category": "ds",
+      "main_photo": "/images/recipes/ds/main.jpg"
     }
   ]
 }

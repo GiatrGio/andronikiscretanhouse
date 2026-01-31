@@ -1,104 +1,53 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import TableCard from "@/components/admin/cards/TableCard";
+import AddRecipeModal from "@/components/admin/AddRecipeModal";
 import { useAdmin } from "@/components/admin/AdminContext";
+import { RecipeSummary } from "@/lib/constants";
 
 export default function RecipesDashboard() {
   const { isSidebarOpen, toggleSidebar } = useAdmin();
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [recipes, setRecipes] = useState<RecipeSummary[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   const breadcrumbItems = [
     { label: "Admin", href: "/admin" },
     { label: "Recipes Dashboard" },
   ];
 
-  // Mock recipe data with random view counts
-  const recipeData = [
-    {
-      name: "Traditional Moussaka",
-      views: "2,847",
-      difficulty: "Medium",
-      category: "Main Courses",
-      lastUpdated: "2025-12-15",
-    },
-    {
-      name: "Wood Oven Bread",
-      views: "3,521",
-      difficulty: "Easy",
-      category: "Breads",
-      lastUpdated: "2025-11-28",
-    },
-    {
-      name: "Homemade Cheese",
-      views: "1,923",
-      difficulty: "Medium",
-      category: "Appetizers",
-      lastUpdated: "2025-12-01",
-    },
-    {
-      name: "Orange Jam",
-      views: "1,456",
-      difficulty: "Easy",
-      category: "Preserves",
-      lastUpdated: "2025-10-22",
-    },
-    {
-      name: "Quince Jelly",
-      views: "987",
-      difficulty: "Medium",
-      category: "Preserves",
-      lastUpdated: "2025-11-15",
-    },
-    {
-      name: "Fig Marmalade",
-      views: "1,234",
-      difficulty: "Easy",
-      category: "Preserves",
-      lastUpdated: "2025-12-08",
-    },
-    {
-      name: "Vanilla Marmalade",
-      views: "876",
-      difficulty: "Easy",
-      category: "Preserves",
-      lastUpdated: "2025-11-30",
-    },
-    {
-      name: "Dakos Salad",
-      views: "4,102",
-      difficulty: "Easy",
-      category: "Appetizers",
-      lastUpdated: "2025-12-20",
-    },
-    {
-      name: "Cretan Dolmades",
-      views: "2,145",
-      difficulty: "Medium",
-      category: "Main Courses",
-      lastUpdated: "2025-11-18",
-    },
-    {
-      name: "Sfakian Pie",
-      views: "1,678",
-      difficulty: "Medium",
-      category: "Breads",
-      lastUpdated: "2025-12-05",
-    },
-    {
-      name: "Honey Cookies",
-      views: "2,934",
-      difficulty: "Easy",
-      category: "Desserts",
-      lastUpdated: "2025-12-12",
-    },
-    {
-      name: "Lamb Kleftiko",
-      views: "3,789",
-      difficulty: "Hard",
-      category: "Main Courses",
-      lastUpdated: "2025-11-25",
-    },
-  ];
+  const loadRecipes = async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/recipes/index.json');
+      const data = await response.json();
+      setRecipes(data.recipes);
+    } catch (error) {
+      console.error('Error loading recipes:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRecipes();
+  }, []);
+
+  const handleRecipeAdded = () => {
+    loadRecipes();
+  };
+
+  // Transform recipes for table display
+  const recipeData = recipes.map(recipe => ({
+    name: recipe.title,
+    views: "N/A", // You can add view tracking later
+    difficulty: recipe.difficulty,
+    category: recipe.category,
+    lastUpdated: new Date().toISOString().split('T')[0],
+  }));
 
   const columns = [
     { key: "name", label: "Recipe Name", className: "font-medium" },
@@ -117,17 +66,38 @@ export default function RecipesDashboard() {
       />
 
       <div className="p-4 sm:p-6 lg:p-8">
-        <div className="mb-6">
-          <h1 className="font-heading text-3xl font-bold text-[var(--color-charcoal)]">
-            Recipes Dashboard
-          </h1>
-          <p className="text-[var(--color-charcoal-light)] mt-2">
-            Manage and monitor your recipe collection
-          </p>
+        <div className="mb-6 flex items-start justify-between">
+          <div>
+            <h1 className="font-heading text-3xl font-bold text-[var(--color-charcoal)]">
+              Recipes Dashboard
+            </h1>
+            <p className="text-[var(--color-charcoal-light)] mt-2">
+              Manage and monitor your recipe collection
+            </p>
+          </div>
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className="flex items-center gap-2 px-4 py-2 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors"
+          >
+            <Plus className="w-5 h-5" />
+            Add Recipe
+          </button>
         </div>
 
-        <TableCard title="All Recipes" columns={columns} data={recipeData} />
+        {isLoading ? (
+          <div className="text-center py-12">
+            <p className="text-[var(--color-charcoal-light)]">Loading recipes...</p>
+          </div>
+        ) : (
+          <TableCard title="All Recipes" columns={columns} data={recipeData} />
+        )}
       </div>
+
+      <AddRecipeModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSuccess={handleRecipeAdded}
+      />
     </>
   );
 }
