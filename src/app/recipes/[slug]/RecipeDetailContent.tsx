@@ -165,24 +165,48 @@ export default function RecipeDetailContent({
                 </h2>
 
                 <ol className="space-y-6">
-                  {recipe.instructions.map((instruction, index) => (
-                      <li key={index} className="flex gap-4">
+                  {(() => {
+                    // Group instructions by step number
+                    const stepMap = new Map<number, { text?: string; photos: string[] }>();
+
+                    recipe.instructions.forEach((instruction) => {
+                      if (!stepMap.has(instruction.step)) {
+                        stepMap.set(instruction.step, { photos: [] });
+                      }
+                      const step = stepMap.get(instruction.step)!;
+
+                      if (instruction.type === "text") {
+                        step.text = instruction.value;
+                      } else if (instruction.type === "photo") {
+                        step.photos.push(instruction.value);
+                      }
+                    });
+
+                    // Convert to sorted array
+                    const steps = Array.from(stepMap.entries())
+                      .sort(([a], [b]) => a - b)
+                      .map(([stepNum, stepData]) => ({ stepNum, ...stepData }));
+
+                    return steps.map(({ stepNum, text, photos }) => (
+                      <li key={stepNum} className="flex gap-4">
                         <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-sm font-bold">
-                          {index + 1}
+                          {stepNum}
                         </span>
                         <div className="flex-1">
-                          <p className="text-[var(--color-charcoal-light)] leading-relaxed pt-1 mb-3">
-                            {instruction.text}
-                          </p>
-                          {instruction.images && instruction.images.length > 0 && (
+                          {text && (
+                            <p className="text-[var(--color-charcoal-light)] leading-relaxed pt-1 mb-3">
+                              {text}
+                            </p>
+                          )}
+                          {photos.length > 0 && (
                             <div
                               className={`grid gap-3 ${
-                                instruction.images.length === 2
+                                photos.length === 2
                                   ? "grid-cols-2"
                                   : "grid-cols-1"
                               }`}
                             >
-                              {instruction.images.map((photo, imgIndex) => (
+                              {photos.map((photo, imgIndex) => (
                                 <button
                                   key={imgIndex}
                                   onClick={() => setLightboxImage(photo)}
@@ -202,7 +226,8 @@ export default function RecipeDetailContent({
                           )}
                         </div>
                       </li>
-                    ))}
+                    ));
+                  })()}
                 </ol>
               </div>
 

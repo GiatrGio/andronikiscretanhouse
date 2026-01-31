@@ -91,8 +91,9 @@ export const REVIEWS = [
 
 // Recipe types matching JSON structure
 export interface RecipeInstruction {
-  text: string;
-  images?: string[];
+  step: number;
+  type: "text" | "photo";
+  value: string;
 }
 
 export interface RecipeIngredientGroup {
