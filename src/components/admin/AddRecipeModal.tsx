@@ -1,13 +1,16 @@
 "use client";
 
-import { useState } from "react";
-import { X, Plus, Trash2, Upload } from "lucide-react";
+import { useState, useEffect } from "react";
+import { X, Plus, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { Recipe } from "@/lib/constants";
 
 interface AddRecipeModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  editMode?: boolean;
+  recipeId?: number;
 }
 
 interface IngredientGroup {
@@ -21,8 +24,9 @@ interface InstructionStep {
   photos: File[];
 }
 
-export default function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipeModalProps) {
+export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = false, recipeId }: AddRecipeModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Basic fields
   const [title, setTitle] = useState("");
@@ -47,16 +51,18 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipe
   // Tips
   const [tips, setTips] = useState<string[]>([""]);
 
-  // Auto-generate slug from title
+  // Auto-generate slug from title (only in create mode)
   const handleTitleChange = (value: string) => {
     setTitle(value);
-    const generatedSlug = value
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
-    setSlug(generatedSlug);
+    if (!editMode) {
+      const generatedSlug = value
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
+      setSlug(generatedSlug);
+    }
   };
 
   // Ingredient handlers
@@ -138,6 +144,58 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipe
     setTips(updated);
   };
 
+  // Load recipe data when in edit mode
+  useEffect(() => {
+    if (editMode && recipeId && isOpen) {
+      loadRecipeData();
+    } else if (!editMode && isOpen) {
+      resetForm();
+    }
+  }, [editMode, recipeId, isOpen]);
+
+  const loadRecipeData = async () => {
+    if (!recipeId) return;
+
+    setIsLoading(true);
+    try {
+      const response = await fetch(`/api/admin/recipes/${recipeId}`);
+      const recipe: Recipe & { id: number } = await response.json();
+
+      // Populate form with existing data
+      setTitle(recipe.title);
+      setSlug(recipe.slug);
+      setSummary(recipe.summary);
+      setPreparationTime(recipe.preparation_time);
+      setServes(recipe.serves);
+      setDifficulty(recipe.difficulty);
+      setCategory(recipe.category);
+
+      // Populate ingredients
+      const loadedGroups = recipe.ingredients.map(group => ({
+        group: group.group || "",
+        items: group.items,
+      }));
+      setIngredientGroups(loadedGroups.length > 0 ? loadedGroups : [{ group: "", items: [""] }]);
+
+      // Populate instructions (only text, photos can't be pre-loaded as Files)
+      const textInstructions = recipe.instructions.filter(inst => inst.type === "text");
+      const loadedInstructions = textInstructions.map(inst => ({
+        step: inst.step,
+        text: inst.value,
+        photos: [],
+      }));
+      setInstructions(loadedInstructions.length > 0 ? loadedInstructions : [{ step: 1, text: "", photos: [] }]);
+
+      // Populate tips
+      setTips(recipe.tips_and_notes.length > 0 ? recipe.tips_and_notes : [""]);
+    } catch (error) {
+      console.error("Error loading recipe:", error);
+      alert("Failed to load recipe data");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
@@ -175,7 +233,7 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipe
       }))));
 
       // Add instruction photos
-      instructionsData.forEach((inst, index) => {
+      instructionsData.forEach((inst) => {
         inst.photos.forEach((photo, photoIndex) => {
           formData.append(`instruction_${inst.step}_photo_${photoIndex}`, photo);
         });
@@ -184,21 +242,26 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipe
       // Add tips
       formData.append("tips_and_notes", JSON.stringify(tips.filter(tip => tip.trim() !== "")));
 
-      const response = await fetch("/api/admin/recipes", {
-        method: "POST",
+      const url = editMode ? `/api/admin/recipes/${recipeId}` : "/api/admin/recipes";
+      const method = editMode ? "PUT" : "POST";
+
+      const response = await fetch(url, {
+        method,
         body: formData,
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create recipe");
+        throw new Error(editMode ? "Failed to update recipe" : "Failed to create recipe");
       }
 
       onSuccess();
       onClose();
-      resetForm();
+      if (!editMode) {
+        resetForm();
+      }
     } catch (error) {
-      console.error("Error creating recipe:", error);
-      alert("Failed to create recipe. Please try again.");
+      console.error(editMode ? "Error updating recipe:" : "Error creating recipe:", error);
+      alert(editMode ? "Failed to update recipe. Please try again." : "Failed to create recipe. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -243,7 +306,7 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipe
             {/* Header */}
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
               <h2 className="font-heading text-2xl font-bold text-[var(--color-charcoal)]">
-                Add New Recipe
+                {editMode ? "Edit Recipe" : "Add New Recipe"}
               </h2>
               <button
                 onClick={onClose}
@@ -255,6 +318,14 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipe
 
             {/* Form */}
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
+              {isLoading && (
+                <div className="text-center py-8">
+                  <p className="text-[var(--color-charcoal-light)]">Loading recipe data...</p>
+                </div>
+              )}
+
+              {!isLoading && (
+                <>
               {/* Basic Information */}
               <div className="space-y-4">
                 <h3 className="font-heading text-lg font-semibold text-[var(--color-charcoal)]">
@@ -280,7 +351,9 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipe
                       value={slug}
                       onChange={(e) => setSlug(e.target.value)}
                       required
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                      disabled={editMode}
+                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
+                      title={editMode ? "Slug cannot be changed when editing" : ""}
                     />
                   </div>
                 </div>
@@ -546,9 +619,14 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess }: AddRecipe
                   disabled={isSubmitting}
                   className="flex-1 px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  {isSubmitting ? "Creating..." : "Create Recipe"}
+                  {isSubmitting
+                    ? (editMode ? "Updating..." : "Creating...")
+                    : (editMode ? "Update Recipe" : "Create Recipe")
+                  }
                 </button>
               </div>
+              </>
+              )}
             </form>
           </motion.div>
         </div>

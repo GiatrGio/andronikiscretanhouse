@@ -345,7 +345,7 @@ export default function RecipeDetailContent({
                     transition={{ duration: 0.4, delay: index * 0.1 }}
                   >
                     <Link
-                      href={`/recipes/${relatedRecipe.slug}`}
+                      href={`/recipes/${relatedRecipe.id}`}
                       className="block bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
                     >
                       <div className="relative aspect-[4/3] bg-[var(--color-primary)]/10 flex items-center justify-center">

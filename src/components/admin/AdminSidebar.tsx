@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { BarChart3, TrendingUp, ChefHat } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import { BarChart3, TrendingUp, ChefHat, LogOut } from "lucide-react";
+import { createClient } from "@/lib/supabase/client";
 
 const menuItems = [
   {
@@ -28,6 +29,14 @@ interface AdminSidebarProps {
 
 export default function AdminSidebar({ isOpen }: AdminSidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/admin/login");
+    router.refresh();
+  };
 
   return (
     <>
@@ -75,6 +84,17 @@ export default function AdminSidebar({ isOpen }: AdminSidebarProps) {
               );
             })}
           </nav>
+
+          {/* Logout Button */}
+          <div className="border-t border-[var(--color-cream-dark)] pt-4 mt-4">
+            <button
+              onClick={handleLogout}
+              className="flex items-center gap-3 px-3 py-2.5 rounded-md transition-colors text-[var(--color-charcoal)] hover:bg-red-50 hover:text-red-600 w-full"
+            >
+              <LogOut className="w-5 h-5 flex-shrink-0" />
+              <span className="font-medium text-sm">Logout</span>
+            </button>
+          </div>
         </div>
       </aside>
     </>

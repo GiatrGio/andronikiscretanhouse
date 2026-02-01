@@ -93,7 +93,7 @@
     {
       "id": 10,
       "slug": "recipe-test-photos",
-      "title": "Recipe test photos",
+      "title": "Recipe test photos Edit",
       "summary": "Recipe test photos summary",
       "preparation_time": "45",
       "difficulty": "Medium",
@@ -102,13 +102,13 @@
     },
     {
       "id": 11,
-      "slug": "ds",
-      "title": "ds",
-      "summary": "fdsads",
-      "preparation_time": "43",
+      "slug": "recipe-test-photos",
+      "title": "Recipe test photos",
+      "summary": "Tesf",
+      "preparation_time": "2",
       "difficulty": "Easy",
-      "category": "ds",
-      "main_photo": "/images/recipes/ds/main.jpg"
+      "category": "Main Courses",
+      "main_photo": "/images/recipes/recipe-test-photos/main.jpg"
     }
   ]
 }

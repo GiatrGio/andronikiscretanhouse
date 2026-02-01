@@ -1,7 +1,20 @@
 import { MetadataRoute } from "next";
+import { getAllRecipes } from "@/lib/recipes";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// Use dynamic rendering for sitemap
+export const dynamic = 'force-dynamic';
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://andronikiscretanhouse.com";
+
+  // Get all recipes for dynamic URLs
+  const recipes = await getAllRecipes();
+  const recipeUrls = recipes.map((recipe) => ({
+    url: `${baseUrl}/recipes/${recipe.id}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
 
   return [
     {
@@ -52,5 +65,6 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.8,
     },
+    ...recipeUrls,
   ];
 }

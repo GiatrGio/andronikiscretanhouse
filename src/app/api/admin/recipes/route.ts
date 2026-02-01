@@ -1,10 +1,40 @@
 import { NextRequest, NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
-import { writeFile } from 'fs/promises';
+import { createAdminClient } from '@/lib/supabase/admin';
+import { uploadImageFromBuffer } from '@/lib/supabase/storage';
+
+export async function GET() {
+  try {
+    const supabase = createAdminClient();
+
+    const { data, error } = await supabase
+      .from('recipes')
+      .select('id, data, created_at, updated_at')
+      .order('id', { ascending: true });
+
+    if (error) {
+      throw error;
+    }
+
+    const recipes = data.map((row) => ({
+      id: row.id,
+      ...row.data,
+      created_at: row.created_at,
+      updated_at: row.updated_at,
+    }));
+
+    return NextResponse.json({ recipes });
+  } catch (error) {
+    console.error('Error fetching recipes:', error);
+    return NextResponse.json(
+      { error: 'Failed to fetch recipes' },
+      { status: 500 }
+    );
+  }
+}
 
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createAdminClient();
     const formData = await request.formData();
 
     // Extract basic fields
@@ -16,25 +46,46 @@ export async function POST(request: NextRequest) {
     const difficulty = formData.get('difficulty') as string;
     const category = formData.get('category') as string;
 
-    // Get the next ID
-    const indexPath = path.join(process.cwd(), 'public', 'recipes', 'index.json');
-    const indexData = JSON.parse(fs.readFileSync(indexPath, 'utf8'));
-    const nextId = Math.max(...indexData.recipes.map((r: any) => r.id), 0) + 1;
+    // First, insert the recipe to get the ID
+    const { data: insertedRecipe, error: insertError } = await supabase
+      .from('recipes')
+      .insert({
+        data: {
+          slug,
+          title,
+          summary,
+          preparation_time,
+          serves,
+          difficulty,
+          category,
+          main_photo: '',
+          ingredients: [],
+          instructions: [],
+          tips_and_notes: [],
+        },
+      })
+      .select('id')
+      .single();
 
-    // Create recipe directory for images
-    const recipeImageDir = path.join(process.cwd(), 'public', 'images', 'recipes', slug);
-    if (!fs.existsSync(recipeImageDir)) {
-      fs.mkdirSync(recipeImageDir, { recursive: true });
+    if (insertError || !insertedRecipe) {
+      throw insertError || new Error('Failed to insert recipe');
     }
 
+    const recipeId = insertedRecipe.id;
+
     // Handle main photo upload
-    let mainPhotoPath = `/images/recipes/${slug}-main.jpg`;
+    let mainPhotoUrl = '';
     const mainPhoto = formData.get('mainPhoto') as File | null;
-    if (mainPhoto) {
+    if (mainPhoto && mainPhoto.size > 0) {
       const mainPhotoBuffer = Buffer.from(await mainPhoto.arrayBuffer());
-      const mainPhotoFilePath = path.join(recipeImageDir, 'main.jpg');
-      await writeFile(mainPhotoFilePath, mainPhotoBuffer);
-      mainPhotoPath = `/images/recipes/${slug}/main.jpg`;
+      const uploadedUrl = await uploadImageFromBuffer(
+        mainPhotoBuffer,
+        `${recipeId}/main.jpg`,
+        mainPhoto.type
+      );
+      if (uploadedUrl) {
+        mainPhotoUrl = uploadedUrl;
+      }
     }
 
     // Parse ingredients
@@ -46,7 +97,7 @@ export async function POST(request: NextRequest) {
     const instructionsText = JSON.parse(instructionsTextJson);
 
     // Build instructions array with photos
-    const instructions: any[] = [];
+    const instructions: { step: number; type: string; value: string }[] = [];
 
     for (const inst of instructionsText) {
       // Add text instruction
@@ -64,18 +115,22 @@ export async function POST(request: NextRequest) {
 
         if (!photo) break;
 
-        // Save photo
+        // Upload photo to Supabase Storage
         const photoBuffer = Buffer.from(await photo.arrayBuffer());
-        const photoFileName = `step${inst.step}-${photoIndex + 1}.jpg`;
-        const photoFilePath = path.join(recipeImageDir, photoFileName);
-        await writeFile(photoFilePath, photoBuffer);
+        const photoPath = `${recipeId}/step${inst.step}-${photoIndex + 1}.jpg`;
+        const photoUrl = await uploadImageFromBuffer(
+          photoBuffer,
+          photoPath,
+          photo.type
+        );
 
-        // Add photo instruction
-        instructions.push({
-          step: inst.step,
-          type: 'photo',
-          value: `/images/recipes/${slug}/${photoFileName}`,
-        });
+        if (photoUrl) {
+          instructions.push({
+            step: inst.step,
+            type: 'photo',
+            value: photoUrl,
+          });
+        }
 
         photoIndex++;
       }
@@ -85,45 +140,35 @@ export async function POST(request: NextRequest) {
     const tipsJson = formData.get('tips_and_notes') as string;
     const tips_and_notes = JSON.parse(tipsJson);
 
-    // Create recipe object
-    const recipe = {
-      id: nextId,
+    // Create recipe data object
+    const recipeData = {
       slug,
-      main_photo: mainPhotoPath,
       title,
       summary,
       preparation_time,
       serves,
       difficulty,
       category,
+      main_photo: mainPhotoUrl,
       ingredients,
       instructions,
       tips_and_notes,
     };
 
-    // Save recipe JSON file
-    const recipeFileName = slug.replace(/-/g, '_');
-    const recipeFilePath = path.join(process.cwd(), 'public', 'recipes', `${recipeFileName}.json`);
-    fs.writeFileSync(recipeFilePath, JSON.stringify(recipe, null, 2));
+    // Update the recipe with full data
+    const { error: updateError } = await supabase
+      .from('recipes')
+      .update({ data: recipeData })
+      .eq('id', recipeId);
 
-    // Update index.json
-    indexData.recipes.push({
-      id: nextId,
-      slug,
-      title,
-      summary,
-      preparation_time,
-      difficulty,
-      category,
-      main_photo: mainPhotoPath,
+    if (updateError) {
+      throw updateError;
+    }
+
+    return NextResponse.json({
+      success: true,
+      recipe: { id: recipeId, ...recipeData },
     });
-
-    // Sort recipes by id
-    indexData.recipes.sort((a: any, b: any) => a.id - b.id);
-
-    fs.writeFileSync(indexPath, JSON.stringify(indexData, null, 2));
-
-    return NextResponse.json({ success: true, recipe });
   } catch (error) {
     console.error('Error creating recipe:', error);
     return NextResponse.json(

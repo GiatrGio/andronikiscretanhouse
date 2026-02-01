@@ -1,18 +1,33 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus } from "lucide-react";
+import { Plus, Pencil, Trash2 } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import TableCard from "@/components/admin/cards/TableCard";
 import AddRecipeModal from "@/components/admin/AddRecipeModal";
+import ConfirmDialog from "@/components/admin/ConfirmDialog";
 import { useAdmin } from "@/components/admin/AdminContext";
-import { RecipeSummary } from "@/lib/constants";
+
+interface RecipeWithId {
+  id: number;
+  slug: string;
+  title: string;
+  summary: string;
+  preparation_time: string;
+  difficulty: "Easy" | "Medium" | "Hard";
+  category: string;
+  main_photo: string;
+  updated_at?: string;
+}
 
 export default function RecipesDashboard() {
   const { isSidebarOpen, toggleSidebar } = useAdmin();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [recipes, setRecipes] = useState<RecipeSummary[]>([]);
+  const [recipes, setRecipes] = useState<RecipeWithId[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [editRecipeId, setEditRecipeId] = useState<number | null>(null);
+  const [deleteRecipeIndex, setDeleteRecipeIndex] = useState<number | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const breadcrumbItems = [
     { label: "Admin", href: "/admin" },
@@ -22,9 +37,9 @@ export default function RecipesDashboard() {
   const loadRecipes = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch('/recipes/index.json');
+      const response = await fetch('/api/admin/recipes');
       const data = await response.json();
-      setRecipes(data.recipes);
+      setRecipes(data.recipes || []);
     } catch (error) {
       console.error('Error loading recipes:', error);
     } finally {
@@ -40,13 +55,55 @@ export default function RecipesDashboard() {
     loadRecipes();
   };
 
+  const handleEdit = (index: number) => {
+    const recipe = recipes[index];
+    setEditRecipeId(recipe.id);
+    setIsModalOpen(true);
+  };
+
+  const handleDelete = (index: number) => {
+    setDeleteRecipeIndex(index);
+  };
+
+  const confirmDelete = async () => {
+    if (deleteRecipeIndex === null) return;
+
+    const recipe = recipes[deleteRecipeIndex];
+    setIsDeleting(true);
+
+    try {
+      const response = await fetch(`/api/admin/recipes/${recipe.id}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to delete recipe");
+      }
+
+      await loadRecipes();
+      setDeleteRecipeIndex(null);
+    } catch (error) {
+      console.error("Error deleting recipe:", error);
+      alert("Failed to delete recipe. Please try again.");
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditRecipeId(null);
+  };
+
   // Transform recipes for table display
   const recipeData = recipes.map(recipe => ({
     name: recipe.title,
-    views: "N/A", // You can add view tracking later
+    views: "N/A",
     difficulty: recipe.difficulty,
     category: recipe.category,
-    lastUpdated: new Date().toISOString().split('T')[0],
+    lastUpdated: recipe.updated_at
+      ? new Date(recipe.updated_at).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0],
   }));
 
   const columns = [
@@ -89,14 +146,47 @@ export default function RecipesDashboard() {
             <p className="text-[var(--color-charcoal-light)]">Loading recipes...</p>
           </div>
         ) : (
-          <TableCard title="All Recipes" columns={columns} data={recipeData} />
+          <TableCard
+            title="All Recipes"
+            columns={columns}
+            data={recipeData}
+            actions={[
+              {
+                icon: <Pencil className="w-4 h-4 text-blue-600" />,
+                onClick: handleEdit,
+                title: "Edit recipe",
+              },
+              {
+                icon: <Trash2 className="w-4 h-4 text-red-600" />,
+                onClick: handleDelete,
+                title: "Delete recipe",
+              },
+            ]}
+          />
         )}
       </div>
 
       <AddRecipeModal
         isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+        onClose={handleCloseModal}
         onSuccess={handleRecipeAdded}
+        editMode={!!editRecipeId}
+        recipeId={editRecipeId || undefined}
+      />
+
+      <ConfirmDialog
+        isOpen={deleteRecipeIndex !== null}
+        onClose={() => setDeleteRecipeIndex(null)}
+        onConfirm={confirmDelete}
+        title="Delete Recipe"
+        message={
+          deleteRecipeIndex !== null
+            ? `Are you sure you want to delete "${recipes[deleteRecipeIndex]?.title}"? This action cannot be undone.`
+            : ""
+        }
+        confirmText={isDeleting ? "Deleting..." : "Delete"}
+        cancelText="Cancel"
+        isDestructive
       />
     </>
   );

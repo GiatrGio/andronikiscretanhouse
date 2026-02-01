@@ -100,7 +100,7 @@ export default function RecipesContent({ recipes }: RecipesContentProps) {
                   transition={{ duration: 0.3, delay: index * 0.05 }}
                 >
                   <Link
-                    href={`/recipes/${recipe.slug}`}
+                    href={`/recipes/${recipe.id}`}
                     className="block bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
                   >
                     <div className="relative aspect-[4/3] bg-[var(--color-primary)]/10 overflow-hidden">

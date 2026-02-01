@@ -1,66 +1,22 @@
 {
-  "id": 10,
+  "id": 11,
   "slug": "recipe-test-photos",
   "main_photo": "/images/recipes/recipe-test-photos/main.jpg",
   "title": "Recipe test photos",
-  "summary": "Recipe test photos summary",
-  "preparation_time": "45",
-  "serves": "6",
-  "difficulty": "Medium",
-  "category": "Main courses",
-  "ingredients": [
-    {
-      "group": "Base",
-      "items": [
-        "ing 1 "
-      ]
-    },
-    {
-      "group": "Main group ",
-      "items": [
-        "ing 2"
-      ]
-    }
-  ],
+  "summary": "Tesf",
+  "preparation_time": "2",
+  "serves": "3",
+  "difficulty": "Easy",
+  "category": "Main Courses",
+  "ingredients": [],
   "instructions": [
     {
       "step": 1,
       "type": "text",
-      "value": "inst 1 "
-    },
-    {
-      "step": 2,
-      "type": "text",
-      "value": "inst 2"
-    },
-    {
-      "step": 2,
-      "type": "photo",
-      "value": "/images/recipes/recipe-test-photos/step2-1.jpg"
-    },
-    {
-      "step": 3,
-      "type": "text",
-      "value": "inst 3"
-    },
-    {
-      "step": 3,
-      "type": "photo",
-      "value": "/images/recipes/recipe-test-photos/step3-1.jpg"
-    },
-    {
-      "step": 3,
-      "type": "photo",
-      "value": "/images/recipes/recipe-test-photos/step3-2.jpg"
-    },
-    {
-      "step": 4,
-      "type": "text",
-      "value": "inst 4"
+      "value": "das"
     }
   ],
   "tips_and_notes": [
-    "tip 1 ",
-    "tip 2"
+    "ds"
   ]
 }
