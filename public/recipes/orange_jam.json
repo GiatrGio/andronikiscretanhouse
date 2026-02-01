@@ -1,7 +1,7 @@
 {
   "id": 4,
   "slug": "orange-jam",
-  "main_photo": "/images/recipes/orange-jam-main.jpg",
+  "main_photo": "",
   "title": "Orange Jam",
   "summary": "Sweet and tangy preserve made from local Cretan oranges.",
   "preparation_time": "45 min",
@@ -22,16 +22,16 @@
   "instructions": [
     {"step": 1, "type": "text", "value": "Wash oranges thoroughly. Using a vegetable peeler, remove the zest in strips, avoiding the white pith."},
     {"step": 2, "type": "text", "value": "Cut zest into thin julienne strips. Peel oranges completely and chop the flesh, removing seeds."},
-    {"step": 2, "type": "photo", "value": "/images/recipes/orange-step2.jpg"},
+    {"step": 2, "type": "photo", "value": ""},
     {"step": 3, "type": "text", "value": "In a large pot, combine orange zest, chopped oranges, water, and cinnamon stick. Bring to a boil."},
     {"step": 4, "type": "text", "value": "Reduce heat and simmer for 10 minutes until the zest is tender."},
     {"step": 5, "type": "text", "value": "Add sugar and lemon juice. Stir until sugar dissolves completely."},
     {"step": 6, "type": "text", "value": "Increase heat to medium-high and boil for 15-20 minutes, stirring frequently, until the mixture thickens and reaches jam consistency."},
-    {"step": 6, "type": "photo", "value": "/images/recipes/orange-step6-1.jpg"},
-    {"step": 6, "type": "photo", "value": "/images/recipes/orange-step6-2.jpg"},
+    {"step": 6, "type": "photo", "value": ""},
+    {"step": 6, "type": "photo", "value": ""},
     {"step": 7, "type": "text", "value": "Test by placing a small amount on a cold plate - it should wrinkle when pushed with your finger."},
     {"step": 8, "type": "text", "value": "Remove cinnamon stick. Pour into sterilized jars and seal while hot."},
-    {"step": 8, "type": "photo", "value": "/images/recipes/orange-step8.jpg"},
+    {"step": 8, "type": "photo", "value": ""},
     {"step": 9, "type": "text", "value": "Store in a cool, dark place. Refrigerate after opening."}
   ],
   "tips_and_notes": [

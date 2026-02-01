@@ -32,6 +32,7 @@ export default function RecipeDetailContent({
   relatedRecipes,
 }: RecipeDetailContentProps) {
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
+  const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
   return (
     <div className="bg-[var(--color-cream)] min-h-screen">
@@ -60,9 +61,9 @@ export default function RecipeDetailContent({
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative aspect-[16/9] bg-[var(--color-primary)]/10 rounded-2xl overflow-hidden mb-8"
+            className="relative aspect-[16/9] bg-[var(--color-primary)]/10 rounded-2xl overflow-hidden mb-8 flex items-center justify-center"
           >
-            {recipe.main_photo ? (
+            {recipe.main_photo && !imageErrors.has(recipe.main_photo) ? (
               <Image
                 src={recipe.main_photo}
                 alt={recipe.title}
@@ -70,11 +71,13 @@ export default function RecipeDetailContent({
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 896px"
                 priority
+                unoptimized
+                onError={() => {
+                  setImageErrors(prev => new Set(prev).add(recipe.main_photo));
+                }}
               />
             ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <ChefHat className="w-24 h-24 text-[var(--color-primary)]/30" />
-              </div>
+              <ChefHat className="w-24 h-24 text-[var(--color-primary)]/30" />
             )}
           </motion.div>
 
@@ -190,7 +193,8 @@ export default function RecipeDetailContent({
 
                       if (instruction.type === "text") {
                         step.text = instruction.value;
-                      } else if (instruction.type === "photo") {
+                      } else if (instruction.type === "photo" && instruction.value) {
+                        // Only add non-empty photo paths
                         step.photos.push(instruction.value);
                       }
                     });
@@ -223,15 +227,23 @@ export default function RecipeDetailContent({
                                 <button
                                   key={imgIndex}
                                   onClick={() => setLightboxImage(photo)}
-                                  className="relative aspect-[4/3] bg-[var(--color-primary)]/10 rounded-lg overflow-hidden hover:opacity-90 transition-opacity cursor-pointer group"
+                                  className="relative aspect-[4/3] bg-[var(--color-primary)]/10 rounded-lg overflow-hidden hover:opacity-90 transition-opacity cursor-pointer group flex items-center justify-center"
                                 >
-                                  <Image
-                                    src={photo}
-                                    alt={`Step ${stepNum} - Photo ${imgIndex + 1}`}
-                                    fill
-                                    className="object-cover"
-                                    sizes="(max-width: 768px) 100vw, 50vw"
-                                  />
+                                  {!imageErrors.has(photo) ? (
+                                    <Image
+                                      src={photo}
+                                      alt={`Step ${stepNum} - Photo ${imgIndex + 1}`}
+                                      fill
+                                      className="object-cover"
+                                      sizes="(max-width: 768px) 100vw, 50vw"
+                                      unoptimized
+                                      onError={() => {
+                                        setImageErrors(prev => new Set(prev).add(photo));
+                                      }}
+                                    />
+                                  ) : (
+                                    <ChefHat className="w-12 h-12 text-[var(--color-primary)]/30" />
+                                  )}
                                   <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
                                     <span className="text-white/0 group-hover:text-white/90 text-sm font-medium transition-all drop-shadow-lg">
                                       Click to enlarge
@@ -379,7 +391,7 @@ export default function RecipeDetailContent({
           >
             <button
               onClick={() => setLightboxImage(null)}
-              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors z-10"
               aria-label="Close"
             >
               <X className="w-6 h-6 text-white" />
@@ -388,12 +400,17 @@ export default function RecipeDetailContent({
               initial={{ scale: 0.9 }}
               animate={{ scale: 1 }}
               exit={{ scale: 0.9 }}
-              className="relative max-w-5xl w-full aspect-[4/3] bg-[var(--color-primary)]/10 rounded-lg overflow-hidden"
+              className="relative max-w-5xl w-full aspect-[4/3]"
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="absolute inset-0 flex items-center justify-center">
-                <ChefHat className="w-24 h-24 text-[var(--color-primary)]/30" />
-              </div>
+              <Image
+                src={lightboxImage}
+                alt="Recipe step enlarged"
+                fill
+                className="object-contain rounded-lg"
+                sizes="90vw"
+                unoptimized
+              />
             </motion.div>
           </motion.div>
         )}

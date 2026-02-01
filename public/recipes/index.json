@@ -8,7 +8,7 @@
       "preparation_time": "90 min",
       "difficulty": "Medium",
       "category": "Main Courses",
-      "main_photo": "/images/recipes/moussaka-main.jpg"
+      "main_photo": ""
     },
     {
       "id": 2,
@@ -18,7 +18,7 @@
       "preparation_time": "180 min",
       "difficulty": "Easy",
       "category": "Breads",
-      "main_photo": "/images/recipes/bread-main.jpg"
+      "main_photo": ""
     },
     {
       "id": 3,
@@ -28,7 +28,7 @@
       "preparation_time": "60 min",
       "difficulty": "Medium",
       "category": "Appetizers",
-      "main_photo": "/images/recipes/cheese-main.jpg"
+      "main_photo": ""
     },
     {
       "id": 4,
@@ -38,7 +38,7 @@
       "preparation_time": "45 min",
       "difficulty": "Easy",
       "category": "Preserves",
-      "main_photo": "/images/recipes/orange-jam-main.jpg"
+      "main_photo": ""
     },
     {
       "id": 5,
@@ -48,7 +48,7 @@
       "preparation_time": "60 min",
       "difficulty": "Medium",
       "category": "Preserves",
-      "main_photo": "/images/recipes/quince-jelly-main.jpg"
+      "main_photo": ""
     },
     {
       "id": 6,
@@ -58,7 +58,7 @@
       "preparation_time": "50 min",
       "difficulty": "Easy",
       "category": "Preserves",
-      "main_photo": "/images/recipes/fig-marmalade-main.jpg"
+      "main_photo": ""
     },
     {
       "id": 7,
@@ -68,7 +68,7 @@
       "preparation_time": "40 min",
       "difficulty": "Easy",
       "category": "Preserves",
-      "main_photo": "/images/recipes/vanilla-marmalade-main.jpg"
+      "main_photo": ""
     },
     {
       "id": 8,
@@ -78,7 +78,7 @@
       "preparation_time": "15 min",
       "difficulty": "Easy",
       "category": "Appetizers",
-      "main_photo": "/images/recipes/dakos-salad-main.jpg"
+      "main_photo": ""
     },
     {
       "id": 9,
@@ -88,7 +88,7 @@
       "preparation_time": "30",
       "difficulty": "Medium",
       "category": "Main courses",
-      "main_photo": "/images/recipes/test-recipe-main.jpg"
+      "main_photo": ""
     },
     {
       "id": 10,

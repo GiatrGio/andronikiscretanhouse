@@ -1,7 +1,7 @@
 {
   "id": 7,
   "slug": "vanilla-marmalade",
-  "main_photo": "/images/recipes/vanilla-marmalade-main.jpg",
+  "main_photo": "",
   "title": "Vanilla Marmalade",
   "summary": "Fragrant vanilla-infused preserve, perfect for breakfast.",
   "preparation_time": "40 min",
@@ -21,17 +21,17 @@
   ],
   "instructions": [
     {"step": 1, "type": "text", "value": "Scrape the seeds from vanilla beans and add both seeds and pods to a large pot."},
-    {"step": 1, "type": "photo", "value": "/images/recipes/vanilla-step1.jpg"},
+    {"step": 1, "type": "photo", "value": ""},
     {"step": 2, "type": "text", "value": "Add chopped citrus, water, and lemon juice. Bring to a boil."},
     {"step": 3, "type": "text", "value": "Reduce heat and simmer for 15 minutes until fruit is soft."},
     {"step": 4, "type": "text", "value": "Add sugar and stir until completely dissolved."},
     {"step": 5, "type": "text", "value": "Increase heat to medium-high and boil for 20-25 minutes, stirring often, until thickened."},
-    {"step": 5, "type": "photo", "value": "/images/recipes/vanilla-step5-1.jpg"},
-    {"step": 5, "type": "photo", "value": "/images/recipes/vanilla-step5-2.jpg"},
+    {"step": 5, "type": "photo", "value": ""},
+    {"step": 5, "type": "photo", "value": ""},
     {"step": 6, "type": "text", "value": "Test for doneness - a spoonful should wrinkle on a cold plate."},
     {"step": 7, "type": "text", "value": "Remove vanilla pods (rinse, dry, and save for vanilla sugar if desired)."},
     {"step": 8, "type": "text", "value": "Pour into sterilized jars and seal."},
-    {"step": 8, "type": "photo", "value": "/images/recipes/vanilla-step8.jpg"}
+    {"step": 8, "type": "photo", "value": ""}
   ],
   "tips_and_notes": [
     "Don't discard vanilla pods - they can be dried and used to make vanilla sugar",

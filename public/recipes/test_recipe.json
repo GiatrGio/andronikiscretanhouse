@@ -1,7 +1,7 @@
 {
   "id": 9,
   "slug": "test-recipe",
-  "main_photo": "/images/recipes/test-recipe-main.jpg",
+  "main_photo": "",
   "title": "Test recipe",
   "summary": "Test Summary",
   "preparation_time": "30",

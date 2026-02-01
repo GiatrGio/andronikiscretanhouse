@@ -1,7 +1,7 @@
 {
   "id": 8,
   "slug": "dakos-salad",
-  "main_photo": "/images/recipes/dakos-salad-main.jpg",
+  "main_photo": "",
   "title": "Dakos Salad",
   "summary": "Traditional Cretan salad with barley rusks, tomatoes, and mizithra cheese.",
   "preparation_time": "15 min",
@@ -28,15 +28,15 @@
     {"step": 1, "type": "text", "value": "If using barley rusks, briefly moisten them under running water or dip in a bowl of water for 2-3 seconds. They should soften slightly but remain crunchy in the center."},
     {"step": 2, "type": "text", "value": "Place rusks on individual serving plates."},
     {"step": 3, "type": "text", "value": "Grate tomatoes using the large holes of a box grater, discarding the skin. Season with salt."},
-    {"step": 3, "type": "photo", "value": "/images/recipes/dakos-step3.jpg"},
+    {"step": 3, "type": "photo", "value": ""},
     {"step": 4, "type": "text", "value": "Spoon the grated tomato over each rusk, allowing it to soak in slightly."},
     {"step": 5, "type": "text", "value": "Top with crumbled cheese, sliced onions, olives, and cucumber."},
-    {"step": 5, "type": "photo", "value": "/images/recipes/dakos-step5-1.jpg"},
-    {"step": 5, "type": "photo", "value": "/images/recipes/dakos-step5-2.jpg"},
+    {"step": 5, "type": "photo", "value": ""},
+    {"step": 5, "type": "photo", "value": ""},
     {"step": 6, "type": "text", "value": "Drizzle generously with olive oil and vinegar."},
     {"step": 7, "type": "text", "value": "Sprinkle with oregano, salt, and pepper."},
     {"step": 8, "type": "text", "value": "Serve immediately while the base still has some crunch."},
-    {"step": 8, "type": "photo", "value": "/images/recipes/dakos-step8.jpg"}
+    {"step": 8, "type": "photo", "value": ""}
   ],
   "tips_and_notes": [
     "The key is the quality of the tomatoes - use the ripest, most flavorful ones you can find",

@@ -1,7 +1,7 @@
 {
   "id": 5,
   "slug": "quince-jelly",
-  "main_photo": "/images/recipes/quince-jelly-main.jpg",
+  "main_photo": "",
   "title": "Quince Jelly",
   "summary": "Delicate jelly with the subtle sweetness of fresh quince fruit.",
   "preparation_time": "60 min",
@@ -22,16 +22,16 @@
   "instructions": [
     {"step": 1, "type": "text", "value": "Wash quinces and cut into quarters. No need to peel or core - the skin and seeds add pectin."},
     {"step": 2, "type": "text", "value": "Place quince pieces in a large pot with water. Bring to a boil, then reduce heat and simmer for 45 minutes until very soft."},
-    {"step": 2, "type": "photo", "value": "/images/recipes/quince-step2.jpg"},
+    {"step": 2, "type": "photo", "value": ""},
     {"step": 3, "type": "text", "value": "Line a colander with cheesecloth and strain the mixture into a bowl. Let drip for several hours or overnight - don't squeeze or the jelly will be cloudy."},
-    {"step": 3, "type": "photo", "value": "/images/recipes/quince-step3-1.jpg"},
-    {"step": 3, "type": "photo", "value": "/images/recipes/quince-step3-2.jpg"},
+    {"step": 3, "type": "photo", "value": ""},
+    {"step": 3, "type": "photo", "value": ""},
     {"step": 4, "type": "text", "value": "Measure the extracted juice. For every cup of juice, add 3/4 cup of sugar."},
     {"step": 5, "type": "text", "value": "Pour juice into a pot, add sugar and lemon juice. Stir over medium heat until sugar dissolves."},
     {"step": 6, "type": "text", "value": "Bring to a rapid boil and cook for 20-30 minutes until it reaches the jelling point (220°F/105°C)."},
     {"step": 7, "type": "text", "value": "Test by placing a small amount on a cold plate - it should set and wrinkle when pushed."},
     {"step": 8, "type": "text", "value": "Pour into sterilized jars and seal immediately."},
-    {"step": 8, "type": "photo", "value": "/images/recipes/quince-step8.jpg"}
+    {"step": 8, "type": "photo", "value": ""}
   ],
   "tips_and_notes": [
     "Quinces turn a beautiful pink color when cooked - this is natural",

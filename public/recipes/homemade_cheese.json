@@ -1,7 +1,7 @@
 {
   "id": 3,
   "slug": "homemade-cheese",
-  "main_photo": "/images/recipes/cheese-main.jpg",
+  "main_photo": "",
   "title": "Homemade Cheese",
   "summary": "Fresh, creamy cheese made using traditional Cretan methods.",
   "preparation_time": "60 min",
@@ -22,15 +22,15 @@
     {"step": 1, "type": "text", "value": "Pour milk into a large pot and heat over medium heat, stirring occasionally to prevent scorching."},
     {"step": 2, "type": "text", "value": "When milk reaches 185°F (85°C) or just before boiling, remove from heat."},
     {"step": 3, "type": "text", "value": "Add lemon juice or vinegar and stir gently. The milk will begin to curdle immediately."},
-    {"step": 3, "type": "photo", "value": "/images/recipes/cheese-step3.jpg"},
+    {"step": 3, "type": "photo", "value": ""},
     {"step": 4, "type": "text", "value": "Let stand for 10 minutes. You'll see clear separation between curds and whey."},
-    {"step": 4, "type": "photo", "value": "/images/recipes/cheese-step4-1.jpg"},
-    {"step": 4, "type": "photo", "value": "/images/recipes/cheese-step4-2.jpg"},
+    {"step": 4, "type": "photo", "value": ""},
+    {"step": 4, "type": "photo", "value": ""},
     {"step": 5, "type": "text", "value": "Line a colander with cheesecloth and place over a large bowl. Pour the mixture through to strain."},
     {"step": 6, "type": "text", "value": "Gather the corners of the cheesecloth and rinse the curds under cold water."},
     {"step": 7, "type": "text", "value": "Squeeze out excess liquid, add salt, and mix gently."},
     {"step": 8, "type": "text", "value": "Tie the cheesecloth into a bundle and hang over a bowl for 2-3 hours to drain completely."},
-    {"step": 8, "type": "photo", "value": "/images/recipes/cheese-step8.jpg"},
+    {"step": 8, "type": "photo", "value": ""},
     {"step": 9, "type": "text", "value": "Unwrap and enjoy fresh, or refrigerate in an airtight container for up to 5 days."}
   ],
   "tips_and_notes": [

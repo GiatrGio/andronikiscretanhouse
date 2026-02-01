@@ -1,7 +1,7 @@
 {
   "id": 2,
   "slug": "wood-oven-bread",
-  "main_photo": "/images/recipes/bread-main.jpg",
+  "main_photo": "",
   "title": "Wood Oven Bread",
   "summary": "Crusty artisan bread baked in our traditional wood-fired oven.",
   "preparation_time": "180 min",
@@ -24,15 +24,15 @@
     {"step": 1, "type": "text", "value": "In a large bowl, combine warm water, yeast, and honey. Let stand for 5 minutes until foamy."},
     {"step": 2, "type": "text", "value": "Add flour, salt, and olive oil. Mix until a shaggy dough forms."},
     {"step": 3, "type": "text", "value": "Turn dough onto a floured surface and knead for 10 minutes until smooth and elastic."},
-    {"step": 3, "type": "photo", "value": "/images/recipes/bread-step3.jpg"},
+    {"step": 3, "type": "photo", "value": ""},
     {"step": 4, "type": "text", "value": "Place in an oiled bowl, cover with a damp cloth, and let rise in a warm place for 1.5-2 hours until doubled."},
-    {"step": 4, "type": "photo", "value": "/images/recipes/bread-step4-1.jpg"},
-    {"step": 4, "type": "photo", "value": "/images/recipes/bread-step4-2.jpg"},
+    {"step": 4, "type": "photo", "value": ""},
+    {"step": 4, "type": "photo", "value": ""},
     {"step": 5, "type": "text", "value": "Punch down the dough and divide into 2 pieces. Shape into round loaves."},
     {"step": 6, "type": "text", "value": "Place on a floured surface, cover, and let rise for another 30-45 minutes."},
     {"step": 7, "type": "text", "value": "Preheat your oven to 450°F (230°C). If using a wood oven, ensure it reaches about 400°F."},
     {"step": 8, "type": "text", "value": "Score the tops with a sharp knife. Bake for 25-30 minutes until golden brown and hollow-sounding when tapped."},
-    {"step": 8, "type": "photo", "value": "/images/recipes/bread-step8.jpg"},
+    {"step": 8, "type": "photo", "value": ""},
     {"step": 9, "type": "text", "value": "Cool on a wire rack before slicing."}
   ],
   "tips_and_notes": [
