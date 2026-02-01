@@ -7,7 +7,7 @@ export const CONTACT_INFO = {
   email: "andronikiscretanhouse@gmail.com",
   address: "Loutra, Rethymno, Crete, Greece",
   season: "April 20 - October 9",
-  googleMapsUrl: "https://maps.google.com/?q=Loutra+Rethymno+Crete",
+  googleMapsUrl: "https://maps.app.goo.gl/dQDwcsxkPynmpnWP7",
 };
 
 export const NAVIGATION_LINKS = [

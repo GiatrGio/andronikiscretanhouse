@@ -2,17 +2,20 @@
 
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useForm } from "react-hook-form";
-import { MapPin, Phone, Mail, Calendar, Clock, Send, Check } from "lucide-react";
+import { useForm, Controller } from "react-hook-form";
+import { MapPin, Phone, Mail, Calendar, Clock, Send, Check, ExternalLink } from "lucide-react";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import Input, { Textarea, Select } from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { CONTACT_INFO } from "@/lib/constants";
+import { BOOKING_PARTNERS } from "@/lib/bookingPartners";
 
 interface FormData {
   name: string;
   email: string;
   phone: string;
-  preferredDate: string;
+  preferredDates: Date[];
   numberOfGuests: string;
   message: string;
   heardAboutUs: string;
@@ -80,23 +83,34 @@ export default function ContactContent() {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
-  } = useForm<FormData>();
+  } = useForm<FormData>({
+    defaultValues: {
+      preferredDates: [],
+    },
+  });
 
   const onSubmit = async (data: FormData) => {
     setStatus("loading");
     setErrorMessage("");
 
     try {
+      // Format dates to ISO strings for API
+      const formattedData = {
+        ...data,
+        preferredDates: data.preferredDates.map((date) => date.toISOString()),
+      };
+
       const response = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
+        body: JSON.stringify(formattedData),
       });
 
       if (response.ok) {
         setStatus("success");
-        reset();
+        reset({ preferredDates: [] });
       } else {
         const result = await response.json();
         setErrorMessage(result.error || "Something went wrong. Please try again.");
@@ -200,11 +214,91 @@ export default function ContactContent() {
                       placeholder="+1 234 567 8900"
                       {...register("phone")}
                     />
-                    <Input
-                      label="Preferred Date(s)"
-                      type="date"
-                      {...register("preferredDate")}
-                    />
+                    <div className="w-full">
+                      <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-1">
+                        Preferred Date(s)
+                      </label>
+                      <Controller
+                        control={control}
+                        name="preferredDates"
+                        render={({ field }) => (
+                          <div>
+                            <DatePicker
+                              onChange={(date: Date | null) => {
+                                if (date) {
+                                  const currentDates = field.value || [];
+                                  const dateExists = currentDates.some(
+                                    (d) => d.toDateString() === date.toDateString()
+                                  );
+
+                                  if (dateExists) {
+                                    // Remove date if already selected
+                                    field.onChange(
+                                      currentDates.filter(
+                                        (d) => d.toDateString() !== date.toDateString()
+                                      )
+                                    );
+                                  } else {
+                                    // Add date to selection
+                                    field.onChange([...currentDates, date]);
+                                  }
+                                }
+                              }}
+                              highlightDates={field.value || []}
+                              inline={false}
+                              minDate={new Date()}
+                              placeholderText="Click to select dates"
+                              className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-offset-0 placeholder:text-gray-400"
+                              calendarClassName="custom-datepicker"
+                            />
+                            {field.value && field.value.length > 0 && (
+                              <div className="mt-2 flex flex-wrap gap-2">
+                                {field.value.map((date, index) => (
+                                  <div
+                                    key={index}
+                                    className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--color-primary)] text-white rounded-full text-sm"
+                                  >
+                                    <span>
+                                      {date.toLocaleDateString("en-US", {
+                                        month: "short",
+                                        day: "numeric",
+                                        year: "numeric",
+                                      })}
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        field.onChange(
+                                          field.value.filter((_, i) => i !== index)
+                                        );
+                                      }}
+                                      className="hover:bg-white/20 rounded-full p-0.5"
+                                    >
+                                      <svg
+                                        className="w-4 h-4"
+                                        fill="none"
+                                        stroke="currentColor"
+                                        viewBox="0 0 24 24"
+                                      >
+                                        <path
+                                          strokeLinecap="round"
+                                          strokeLinejoin="round"
+                                          strokeWidth={2}
+                                          d="M6 18L18 6M6 6l12 12"
+                                        />
+                                      </svg>
+                                    </button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                          </div>
+                        )}
+                      />
+                      <p className="mt-1 text-sm text-gray-500">
+                        Click dates in the calendar to add/remove them
+                      </p>
+                    </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-6">
@@ -281,6 +375,47 @@ export default function ContactContent() {
                   </p>
                 </form>
               )}
+
+              {/* Partner Booking Section */}
+              <div className="mt-12 pt-12 border-t border-gray-200">
+                <h3 className="font-heading text-xl md:text-2xl font-bold text-[var(--color-charcoal)] mb-6 text-center">
+                  Or book your experience through our partners
+                </h3>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {BOOKING_PARTNERS.map((partner) => (
+                    <a
+                      key={partner.name}
+                      href={partner.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative overflow-hidden"
+                    >
+                      <div
+                        className="relative h-16 flex items-center justify-center transform -skew-x-6 transition-all duration-200 hover:scale-105 hover:shadow-lg"
+                        style={{ backgroundColor: partner.color }}
+                      >
+                        <div className="flex items-center gap-3 transform skew-x-6">
+                          <img
+                            src={partner.iconUrl}
+                            alt={`${partner.name} logo`}
+                            className="w-6 h-6 object-contain bg-white rounded p-0.5"
+                          />
+                          <span
+                            className="font-bold text-lg"
+                            style={{ color: partner.textColor }}
+                          >
+                            {partner.name}
+                          </span>
+                          <ExternalLink
+                            className="w-5 h-5 opacity-80"
+                            style={{ color: partner.textColor }}
+                          />
+                        </div>
+                      </div>
+                    </a>
+                  ))}
+                </div>
+              </div>
             </motion.div>
 
             {/* Contact Information */}
