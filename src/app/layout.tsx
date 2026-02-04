@@ -3,6 +3,7 @@ import { Playfair_Display, Inter } from "next/font/google";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { LocalBusinessJsonLd, CookingClassJsonLd } from "@/components/StructuredData";
+import AnalyticsTracker from "@/components/analytics/AnalyticsTracker";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -93,6 +94,7 @@ export default function RootLayout({
         <CookingClassJsonLd />
       </head>
       <body className="antialiased min-h-screen flex flex-col">
+        <AnalyticsTracker />
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
