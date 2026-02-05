@@ -153,3 +153,98 @@ html {
 .react-datepicker__navigation:hover *::before {
   border-color: var(--color-cream);
 }
+
+/* Booking Calendar Styles (Admin) */
+.booking-calendar .react-datepicker {
+  width: 100%;
+}
+
+.booking-calendar .react-datepicker__month-container {
+  width: 50%;
+  float: left;
+}
+
+.booking-calendar .react-datepicker__day {
+  width: 3rem;
+  height: 3.5rem;
+  line-height: 1;
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.8rem;
+  position: relative;
+  border-radius: 0.375rem;
+  margin: 1px;
+}
+
+.booking-calendar .react-datepicker__day-name {
+  width: 3rem;
+  font-size: 0.75rem;
+}
+
+.booking-calendar .react-datepicker__day--outside-month {
+  visibility: hidden;
+}
+
+.booking-calendar__day--closed {
+  background-color: #fecaca !important;
+  color: #991b1b !important;
+}
+
+.booking-calendar__day--closed:hover {
+  background-color: #fca5a5 !important;
+}
+
+.booking-calendar__day--reduced {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.booking-calendar__day--reduced:hover {
+  background-color: #fde68a !important;
+}
+
+.booking-calendar__day--default {
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+}
+
+.booking-calendar__day--default:hover {
+  background-color: #bbf7d0 !important;
+}
+
+/* Contact page calendar day colors */
+.contact-calendar__day--default {
+  background-color: #dcfce7 !important;
+  color: #166534 !important;
+}
+
+.contact-calendar__day--default:hover {
+  background-color: #bbf7d0 !important;
+}
+
+.contact-calendar__day--reduced {
+  background-color: #fef3c7 !important;
+  color: #92400e !important;
+}
+
+.contact-calendar__day--reduced:hover {
+  background-color: #fde68a !important;
+}
+
+@media (max-width: 768px) {
+  .booking-calendar .react-datepicker__month-container {
+    width: 100%;
+    float: none;
+  }
+
+  .booking-calendar .react-datepicker__day {
+    width: 2.5rem;
+    height: 3rem;
+  }
+
+  .booking-calendar .react-datepicker__day-name {
+    width: 2.5rem;
+  }
+}

@@ -1,10 +1,21 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import { AdminProvider, useAdmin } from "@/components/admin/AdminContext";
 
 function AdminLayoutContent({ children }: { children: React.ReactNode }) {
   const { isSidebarOpen, closeSidebar } = useAdmin();
+  const pathname = usePathname();
+  const isLoginPage = pathname === "/admin/login";
+
+  if (isLoginPage) {
+    return (
+      <div className="min-h-screen bg-[var(--color-cream)] flex items-center justify-center">
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-[var(--color-cream)]">

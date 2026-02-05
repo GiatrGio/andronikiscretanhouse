@@ -1,15 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { motion } from "framer-motion";
-import { useForm, Controller } from "react-hook-form";
-import { MapPin, Phone, Mail, Calendar, Clock, Send, Check, ExternalLink } from "lucide-react";
+import { useForm, Controller, useWatch } from "react-hook-form";
+import { MapPin, Phone, Mail, Calendar, Clock, Send, Check, ExternalLink, AlertTriangle } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Input, { Textarea, Select } from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { CONTACT_INFO } from "@/lib/constants";
 import { BOOKING_PARTNERS } from "@/lib/bookingPartners";
+import type { BookingPreferences, DateOverridePublic } from "@/lib/types/preferences";
+
+// Format date to YYYY-MM-DD using local timezone (not UTC)
+function formatLocalDate(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
 
 interface FormData {
   name: string;
@@ -44,40 +53,120 @@ const heardAboutOptions = [
   { value: "other", label: "Other" },
 ];
 
-const contactDetails = [
-  {
-    icon: MapPin,
-    title: "Location",
-    value: CONTACT_INFO.address,
-    href: CONTACT_INFO.googleMapsUrl,
-    isExternal: true,
-  },
-  {
-    icon: Phone,
-    title: "Phone",
-    value: CONTACT_INFO.phoneDisplay,
-    href: `tel:${CONTACT_INFO.phone}`,
-    isExternal: false,
-  },
-  {
-    icon: Mail,
-    title: "Email",
-    value: CONTACT_INFO.email,
-    href: `mailto:${CONTACT_INFO.email}`,
-    isExternal: false,
-  },
-  {
-    icon: Calendar,
-    title: "Season",
-    value: CONTACT_INFO.season,
-    href: null,
-    isExternal: false,
-  },
-];
-
 export default function ContactContent() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
+  const [bookingPreferences, setBookingPreferences] = useState<BookingPreferences | null>(null);
+  const [seasonDisplay, setSeasonDisplay] = useState(CONTACT_INFO.season);
+
+  // Fetch booking preferences
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const response = await fetch("/api/preferences");
+        if (response.ok) {
+          const data: BookingPreferences = await response.json();
+          setBookingPreferences(data);
+
+          // Update season display text
+          if (data.preferences) {
+            const { season_start_month, season_start_day, season_end_month, season_end_day } = data.preferences;
+            const monthNames = ["", "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+            setSeasonDisplay(`${monthNames[season_start_month]} ${season_start_day} - ${monthNames[season_end_month]} ${season_end_day}`);
+          }
+        }
+      } catch (error) {
+        console.error("Error fetching preferences:", error);
+      }
+    };
+    fetchPreferences();
+  }, []);
+
+  const getOverrideForDate = useCallback(
+    (dateStr: string): DateOverridePublic | undefined => {
+      if (!bookingPreferences) return undefined;
+      return bookingPreferences.dateOverrides.find((o) => o.date === dateStr);
+    },
+    [bookingPreferences]
+  );
+
+  const getSpotsForDate = useCallback(
+    (date: Date): number => {
+      if (!bookingPreferences) return 0;
+      const dateStr = formatLocalDate(date);
+      const override = getOverrideForDate(dateStr);
+      if (override) return override.available_spots;
+      return bookingPreferences.preferences.default_spots;
+    },
+    [bookingPreferences, getOverrideForDate]
+  );
+
+  // Date filtering function
+  const isDateAvailable = useCallback((date: Date): boolean => {
+    if (!bookingPreferences) return true;
+
+    const { preferences, dateOverrides } = bookingPreferences;
+
+    // Check if date is in the past
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    if (date < today) return false;
+
+    // Check season (month/day comparison)
+    const month = date.getMonth() + 1; // 1-12
+    const day = date.getDate();
+    const { season_start_month, season_start_day, season_end_month, season_end_day, available_days } = preferences;
+
+    // Create comparable values (month * 100 + day)
+    const dateVal = month * 100 + day;
+    const startVal = season_start_month * 100 + season_start_day;
+    const endVal = season_end_month * 100 + season_end_day;
+
+    if (dateVal < startVal || dateVal > endVal) return false;
+
+    // Check day of week
+    const dayOfWeek = date.getDay(); // 0-6
+    if (!available_days.includes(dayOfWeek)) return false;
+
+    // Check if day is closed (available_spots === 0)
+    const dateStr = formatLocalDate(date);
+    const override = dateOverrides.find((o) => o.date === dateStr);
+    if (override && override.available_spots === 0) return false;
+
+    return true;
+  }, [bookingPreferences]);
+
+  // Contact details with dynamic season
+  const contactDetails = [
+    {
+      icon: MapPin,
+      title: "Location",
+      value: CONTACT_INFO.address,
+      href: CONTACT_INFO.googleMapsUrl,
+      isExternal: true,
+    },
+    {
+      icon: Phone,
+      title: "Phone",
+      value: CONTACT_INFO.phoneDisplay,
+      href: `tel:${CONTACT_INFO.phone}`,
+      isExternal: false,
+    },
+    {
+      icon: Mail,
+      title: "Email",
+      value: CONTACT_INFO.email,
+      href: `mailto:${CONTACT_INFO.email}`,
+      isExternal: false,
+    },
+    {
+      icon: Calendar,
+      title: "Season",
+      value: seasonDisplay,
+      href: null,
+      isExternal: false,
+    },
+  ];
 
   const {
     register,
@@ -88,8 +177,73 @@ export default function ContactContent() {
   } = useForm<FormData>({
     defaultValues: {
       preferredDates: [],
+      numberOfGuests: "",
     },
   });
+
+  const watchedDates = useWatch({ control, name: "preferredDates" });
+  const watchedGuests = useWatch({ control, name: "numberOfGuests" });
+
+  // Check if any selected date has fewer spots than guest count
+  const spotsWarning = (() => {
+    if (!bookingPreferences || !watchedDates?.length || !watchedGuests) return null;
+    const guestCount = watchedGuests === "9+" ? 9 : parseInt(watchedGuests, 10);
+    if (isNaN(guestCount)) return null;
+
+    const problematicDates = watchedDates.filter((date) => {
+      const spots = getSpotsForDate(date);
+      return spots > 0 && spots < guestCount;
+    });
+
+    if (problematicDates.length === 0) return null;
+
+    return problematicDates.map((date) => ({
+      date,
+      spots: getSpotsForDate(date),
+    }));
+  })();
+
+  // Render day contents with spot count for reduced days
+  const renderDayContents = useCallback(
+    (dayOfMonth: number, date: Date | undefined): React.ReactNode => {
+      if (!date || !bookingPreferences) return dayOfMonth;
+
+      const dateStr = formatLocalDate(date);
+      const override = getOverrideForDate(dateStr);
+
+      if (override && override.available_spots > 0 && override.available_spots < bookingPreferences.preferences.default_spots) {
+        return (
+          <div className="flex flex-col items-center leading-tight">
+            <span>{dayOfMonth}</span>
+            <span className="text-[9px] opacity-70">{override.available_spots} left</span>
+          </div>
+        );
+      }
+
+      return dayOfMonth;
+    },
+    [bookingPreferences, getOverrideForDate]
+  );
+
+  // Day class names for contact calendar
+  const getDayClassName = useCallback(
+    (date: Date): string => {
+      if (!bookingPreferences) return "";
+
+      // Don't color unavailable dates (they stay grey)
+      if (!isDateAvailable(date)) return "";
+
+      const dateStr = formatLocalDate(date);
+      const override = getOverrideForDate(dateStr);
+
+      if (override && override.available_spots > 0 && override.available_spots < bookingPreferences.preferences.default_spots) {
+        return "contact-calendar__day--reduced";
+      }
+
+      return "contact-calendar__day--default";
+    },
+    [bookingPreferences, getOverrideForDate, isDateAvailable]
+  );
 
   const onSubmit = async (data: FormData) => {
     setStatus("loading");
@@ -247,49 +401,62 @@ export default function ContactContent() {
                               highlightDates={field.value || []}
                               inline={false}
                               minDate={new Date()}
+                              filterDate={isDateAvailable}
+                              dayClassName={getDayClassName}
+                              renderDayContents={renderDayContents}
                               placeholderText="Click to select dates"
                               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-offset-0 placeholder:text-gray-400"
                               calendarClassName="custom-datepicker"
                             />
                             {field.value && field.value.length > 0 && (
                               <div className="mt-2 flex flex-wrap gap-2">
-                                {field.value.map((date, index) => (
-                                  <div
-                                    key={index}
-                                    className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--color-primary)] text-white rounded-full text-sm"
-                                  >
-                                    <span>
-                                      {date.toLocaleDateString("en-US", {
-                                        month: "short",
-                                        day: "numeric",
-                                        year: "numeric",
-                                      })}
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => {
-                                        field.onChange(
-                                          field.value.filter((_, i) => i !== index)
-                                        );
-                                      }}
-                                      className="hover:bg-white/20 rounded-full p-0.5"
+                                {field.value.map((date, index) => {
+                                  const spots = getSpotsForDate(date);
+                                  const defaultSpots = bookingPreferences?.preferences.default_spots ?? 8;
+                                  const isReduced = spots > 0 && spots < defaultSpots;
+                                  return (
+                                    <div
+                                      key={index}
+                                      className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm ${
+                                        isReduced
+                                          ? "bg-amber-500 text-white"
+                                          : "bg-[var(--color-primary)] text-white"
+                                      }`}
                                     >
-                                      <svg
-                                        className="w-4 h-4"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
+                                      <span>
+                                        {date.toLocaleDateString("en-US", {
+                                          month: "short",
+                                          day: "numeric",
+                                          year: "numeric",
+                                        })}
+                                        {isReduced && ` (${spots} spots)`}
+                                      </span>
+                                      <button
+                                        type="button"
+                                        onClick={() => {
+                                          field.onChange(
+                                            field.value.filter((_, i) => i !== index)
+                                          );
+                                        }}
+                                        className="hover:bg-white/20 rounded-full p-0.5"
                                       >
-                                        <path
-                                          strokeLinecap="round"
-                                          strokeLinejoin="round"
-                                          strokeWidth={2}
-                                          d="M6 18L18 6M6 6l12 12"
-                                        />
-                                      </svg>
-                                    </button>
-                                  </div>
-                                ))}
+                                        <svg
+                                          className="w-4 h-4"
+                                          fill="none"
+                                          stroke="currentColor"
+                                          viewBox="0 0 24 24"
+                                        >
+                                          <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            strokeWidth={2}
+                                            d="M6 18L18 6M6 6l12 12"
+                                          />
+                                        </svg>
+                                      </button>
+                                    </div>
+                                  );
+                                })}
                               </div>
                             )}
                           </div>
@@ -314,6 +481,28 @@ export default function ContactContent() {
                       {...register("heardAboutUs")}
                     />
                   </div>
+
+                  {/* Guest count warning */}
+                  {spotsWarning && (
+                    <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                      <div>
+                        <p className="text-sm font-medium text-amber-800">
+                          Limited availability on selected date{spotsWarning.length > 1 ? "s" : ""}
+                        </p>
+                        <ul className="mt-1 text-sm text-amber-700">
+                          {spotsWarning.map(({ date, spots }) => (
+                            <li key={date.toISOString()}>
+                              {date.toLocaleDateString("en-US", { month: "short", day: "numeric" })} - only {spots} spot{spots !== 1 ? "s" : ""} available (you selected {watchedGuests} guest{watchedGuests !== "1" ? "s" : ""})
+                            </li>
+                          ))}
+                        </ul>
+                        <p className="mt-1 text-xs text-amber-600">
+                          We'll do our best to accommodate your group. Please mention this in your message.
+                        </p>
+                      </div>
+                    </div>
+                  )}
 
                   <Textarea
                     label="Message"
@@ -470,24 +659,28 @@ export default function ContactContent() {
                 ))}
               </div>
 
-              {/* Map Placeholder */}
-              <div className="relative aspect-video bg-[var(--color-primary)]/10 rounded-xl overflow-hidden">
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <div className="text-center">
-                    <MapPin className="w-12 h-12 text-[var(--color-primary)]/50 mx-auto mb-2" />
-                    <p className="text-[var(--color-charcoal-light)]">
-                      Loutra, Rethymno, Crete
-                    </p>
-                    <a
-                      href={CONTACT_INFO.googleMapsUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-[var(--color-primary)] font-medium hover:underline"
-                    >
-                      Open in Google Maps
-                    </a>
-                  </div>
-                </div>
+              {/* Map */}
+              <div className="relative aspect-video rounded-xl overflow-hidden border border-gray-200">
+                <iframe
+                  src="https://maps.google.com/maps?q=Loutra,+Rethymno,+Crete,+Greece&z=14&output=embed"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Androniki's Cretan House location"
+                  className="absolute inset-0 w-full h-full"
+                />
+                <a
+                  href={CONTACT_INFO.googleMapsUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="absolute bottom-3 right-3 inline-flex items-center gap-1.5 px-3 py-1.5 bg-white/90 backdrop-blur-sm rounded-lg text-sm font-medium text-[var(--color-primary)] hover:bg-white transition-colors shadow-sm"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                  Open in Google Maps
+                </a>
               </div>
 
               {/* FAQ Teaser */}
