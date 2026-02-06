@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { motion } from "framer-motion";
 import Button from "@/components/ui/Button";
 
@@ -13,6 +14,7 @@ interface HeroSectionProps {
   backgroundImage?: string;
   overlay?: boolean;
   height?: "full" | "large" | "medium";
+  showLogo?: boolean;
 }
 
 export default function HeroSection({
@@ -25,6 +27,7 @@ export default function HeroSection({
   backgroundImage,
   overlay = true,
   height = "large",
+  showLogo = false,
 }: HeroSectionProps) {
   const heightClasses = {
     full: "min-h-screen",
@@ -53,6 +56,23 @@ export default function HeroSection({
 
       {/* Content */}
       <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center text-white">
+        {showLogo && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="mb-6"
+          >
+            <Image
+              src="/images/andronikiscretanhouse_logo.png"
+              alt="Androniki's Cretan House logo"
+              width={480}
+              height={128}
+              className="mx-auto w-96 sm:w-[28rem] md:w-[32rem] h-auto brightness-0 invert"
+              priority
+            />
+          </motion.div>
+        )}
         <motion.h1
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}

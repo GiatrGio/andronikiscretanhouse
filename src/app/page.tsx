@@ -6,6 +6,7 @@ export default function HomePage() {
   return (
     <>
       <HeroSection
+        showLogo
         title="Greek Cooking Lessons"
         subtitle="Dining In Rethymno: An Evening Of Cretan Cooking. Experience authentic Cretan cuisine in our family courtyard with traditional wood-fired oven."
         ctaText="Book Your Experience"

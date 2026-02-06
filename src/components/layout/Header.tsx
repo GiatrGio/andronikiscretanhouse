@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -38,15 +37,8 @@ export default function Header() {
           {/* Logo */}
           <Link
             href="/"
-            className="flex items-center gap-2 font-heading text-xl md:text-2xl font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors"
+            className="font-heading text-xl md:text-2xl font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors"
           >
-            <Image
-              src="/images/andronikiscretanhouse_logo.png"
-              alt="Androniki's Cretan House logo"
-              width={40}
-              height={40}
-              className="w-8 h-8 md:w-10 md:h-10 object-contain"
-            />
             {SITE_NAME}
           </Link>
 
