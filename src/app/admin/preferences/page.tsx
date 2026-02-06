@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, Calendar as CalendarIcon, FileText } from "lucide-react";
+import { X, Calendar as CalendarIcon, FileText, Plus, Clock } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import AdminHeader from "@/components/admin/AdminHeader";
 import { useAdmin } from "@/components/admin/AdminContext";
-import type { Preferences, DateOverride } from "@/lib/types/preferences";
+import type { Preferences, DateOverride, MonthlyTimeSlot } from "@/lib/types/preferences";
+import { DEFAULT_TIME_SLOTS } from "@/lib/timeSlots";
 
 const MONTHS = [
   { value: 1, label: "January" },
@@ -61,6 +62,7 @@ export default function PreferencesPage() {
   const [seasonEndDay, setSeasonEndDay] = useState(9);
   const [availableDays, setAvailableDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [defaultSpots, setDefaultSpots] = useState(8);
+  const [monthlyTimeSlots, setMonthlyTimeSlots] = useState<MonthlyTimeSlot[]>(DEFAULT_TIME_SLOTS);
 
   // Date overrides state
   const [dateOverrides, setDateOverrides] = useState<DateOverride[]>([]);
@@ -93,6 +95,7 @@ export default function PreferencesPage() {
         setSeasonEndDay(p.season_end_day);
         setAvailableDays(p.available_days);
         setDefaultSpots(p.default_spots ?? 8);
+        setMonthlyTimeSlots(p.monthly_time_slots ?? DEFAULT_TIME_SLOTS);
       }
     } catch (error) {
       console.error("Error loading preferences:", error);
@@ -126,6 +129,7 @@ export default function PreferencesPage() {
           season_end_day: seasonEndDay,
           available_days: availableDays,
           default_spots: defaultSpots,
+          monthly_time_slots: monthlyTimeSlots,
         }),
       });
 
@@ -147,6 +151,39 @@ export default function PreferencesPage() {
     setAvailableDays((prev) =>
       prev.includes(day) ? prev.filter((d) => d !== day) : [...prev, day].sort()
     );
+  };
+
+  const toggleMonthForSlot = (slotIndex: number, month: number) => {
+    setMonthlyTimeSlots((prev) =>
+      prev.map((slot, i) => {
+        if (i !== slotIndex) {
+          return { ...slot, months: slot.months.filter((m) => m !== month) };
+        }
+        return {
+          ...slot,
+          months: slot.months.includes(month)
+            ? slot.months.filter((m) => m !== month)
+            : [...slot.months, month].sort((a, b) => a - b),
+        };
+      })
+    );
+  };
+
+  const updateSlotField = (index: number, field: keyof MonthlyTimeSlot, value: string | number[]) => {
+    setMonthlyTimeSlots((prev) =>
+      prev.map((slot, i) => (i === index ? { ...slot, [field]: value } : slot))
+    );
+  };
+
+  const addTimeSlot = () => {
+    setMonthlyTimeSlots((prev) => [
+      ...prev,
+      { label: "", months: [], start_time: "17:00", end_time: "22:00" },
+    ]);
+  };
+
+  const removeTimeSlot = (index: number) => {
+    setMonthlyTimeSlots((prev) => prev.filter((_, i) => i !== index));
   };
 
   const getOverrideForDate = useCallback(
@@ -450,6 +487,101 @@ export default function PreferencesPage() {
                 className="w-24 px-3 py-2 rounded-lg border border-gray-300 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:outline-none focus:ring-2"
               />
               <span className="text-sm text-[var(--color-charcoal-light)]">spots per day</span>
+            </div>
+          </div>
+
+          {/* Course Time Slots */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-4">
+              Course Time Slots
+            </h2>
+            <p className="text-sm text-[var(--color-charcoal-light)] mb-4">
+              Set different course start and end times for different months. Each month in the season should be covered by one time period.
+            </p>
+
+            <div className="space-y-4">
+              {monthlyTimeSlots.map((slot, index) => (
+                <div key={index} className="border border-gray-200 rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-[var(--color-charcoal-light)]" />
+                      <input
+                        type="text"
+                        value={slot.label}
+                        onChange={(e) => updateSlotField(index, "label", e.target.value)}
+                        placeholder="Period name (e.g., Summer)"
+                        className="px-2 py-1 rounded border border-gray-300 text-sm font-medium focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:outline-none focus:ring-2"
+                      />
+                    </div>
+                    {monthlyTimeSlots.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeTimeSlot(index)}
+                        className="p-1 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded"
+                        title="Remove time period"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="mb-3">
+                    <label className="block text-xs font-medium text-[var(--color-charcoal-light)] mb-1.5">
+                      Months
+                    </label>
+                    <div className="flex flex-wrap gap-1.5">
+                      {MONTHS.map((m) => (
+                        <button
+                          key={m.value}
+                          type="button"
+                          onClick={() => toggleMonthForSlot(index, m.value)}
+                          className={`px-2 py-1 rounded text-xs font-medium transition-colors ${
+                            slot.months.includes(m.value)
+                              ? "bg-[var(--color-primary)] text-white"
+                              : "bg-gray-100 text-[var(--color-charcoal)] hover:bg-gray-200"
+                          }`}
+                        >
+                          {m.label.substring(0, 3)}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--color-charcoal-light)] mb-1">
+                        Start Time
+                      </label>
+                      <input
+                        type="time"
+                        value={slot.start_time}
+                        onChange={(e) => updateSlotField(index, "start_time", e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:outline-none focus:ring-2 text-sm"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-[var(--color-charcoal-light)] mb-1">
+                        End Time
+                      </label>
+                      <input
+                        type="time"
+                        value={slot.end_time}
+                        onChange={(e) => updateSlotField(index, "end_time", e.target.value)}
+                        className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:outline-none focus:ring-2 text-sm"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+
+              <button
+                type="button"
+                onClick={addTimeSlot}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-primary)] bg-[var(--color-primary)]/5 rounded-lg hover:bg-[var(--color-primary)]/10 transition-colors"
+              >
+                <Plus className="w-4 h-4" />
+                Add Time Period
+              </button>
             </div>
           </div>
 

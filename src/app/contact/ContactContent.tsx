@@ -11,6 +11,7 @@ import Button from "@/components/ui/Button";
 import { CONTACT_INFO } from "@/lib/constants";
 import { BOOKING_PARTNERS } from "@/lib/bookingPartners";
 import type { BookingPreferences, DateOverridePublic } from "@/lib/types/preferences";
+import { getTimeSlotForMonth, formatTimeSlotRange, formatMonthRange, formatTime24to12 } from "@/lib/timeSlots";
 
 // Format date to YYYY-MM-DD using local timezone (not UTC)
 function formatLocalDate(date: Date): string {
@@ -107,10 +108,11 @@ export default function ContactContent() {
 
     const { preferences, dateOverrides } = bookingPreferences;
 
-    // Check if date is in the past
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    if (date < today) return false;
+    // Check if date is in the past or within the next 2 days
+    const minDate = new Date();
+    minDate.setHours(0, 0, 0, 0);
+    minDate.setDate(minDate.getDate() + 2);
+    if (date < minDate) return false;
 
     // Check season (month/day comparison)
     const month = date.getMonth() + 1; // 1-12
@@ -400,7 +402,7 @@ export default function ContactContent() {
                               }}
                               highlightDates={field.value || []}
                               inline={false}
-                              minDate={new Date()}
+                              minDate={(() => { const d = new Date(); d.setDate(d.getDate() + 2); return d; })()}
                               filterDate={isDateAvailable}
                               dayClassName={getDayClassName}
                               renderDayContents={renderDayContents}
@@ -408,12 +410,38 @@ export default function ContactContent() {
                               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:outline-none focus:ring-2 focus:ring-offset-0 placeholder:text-gray-400"
                               calendarClassName="custom-datepicker"
                             />
+                            {/* Time Slots Info Bar */}
+                            {bookingPreferences?.preferences.monthly_time_slots &&
+                              bookingPreferences.preferences.monthly_time_slots.length > 0 && (
+                              <div className="mt-2 p-2.5 bg-[var(--color-primary)]/5 rounded-lg">
+                                <div className="flex items-center gap-1.5 mb-1">
+                                  <Clock className="w-3.5 h-3.5 text-[var(--color-primary)]" />
+                                  <span className="text-xs font-medium text-[var(--color-charcoal)]">
+                                    Course Times
+                                  </span>
+                                </div>
+                                <div className="space-y-0.5">
+                                  {bookingPreferences.preferences.monthly_time_slots.map((slot, i) => (
+                                    <div key={i} className="text-xs text-[var(--color-charcoal-light)]">
+                                      <span className="font-medium">{slot.label}:</span>{" "}
+                                      {formatTimeSlotRange(slot)}{" "}
+                                      <span className="opacity-75">
+                                        ({formatMonthRange(slot.months)})
+                                      </span>
+                                    </div>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
                             {field.value && field.value.length > 0 && (
                               <div className="mt-2 flex flex-wrap gap-2">
                                 {field.value.map((date, index) => {
                                   const spots = getSpotsForDate(date);
                                   const defaultSpots = bookingPreferences?.preferences.default_spots ?? 8;
                                   const isReduced = spots > 0 && spots < defaultSpots;
+                                  const timeSlot = bookingPreferences?.preferences.monthly_time_slots
+                                    ? getTimeSlotForMonth(bookingPreferences.preferences.monthly_time_slots, date.getMonth() + 1)
+                                    : undefined;
                                   return (
                                     <div
                                       key={index}
@@ -427,8 +455,8 @@ export default function ContactContent() {
                                         {date.toLocaleDateString("en-US", {
                                           month: "short",
                                           day: "numeric",
-                                          year: "numeric",
                                         })}
+                                        {timeSlot && ` ${formatTime24to12(timeSlot.start_time)}`}
                                         {isReduced && ` (${spots} spots)`}
                                       </span>
                                       <button

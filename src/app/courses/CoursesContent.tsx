@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
@@ -12,6 +13,8 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import type { MonthlyTimeSlot } from "@/lib/types/preferences";
+import { DEFAULT_TIME_SLOTS, getTimeSlotForMonth, generateTimeline } from "@/lib/timeSlots";
 
 const whatYouLearn = [
   {
@@ -40,33 +43,28 @@ const whatYouLearn = [
   },
 ];
 
-const timeline = [
+const timelineTitles = [
   {
-    time: "5:30 PM",
     title: "Welcome & Garden Tour",
     description:
       "Meet your hosts, enjoy a welcome drink, and tour our organic garden where we'll pick fresh ingredients for our meal.",
   },
   {
-    time: "6:00 PM",
     title: "Cooking Begins",
     description:
       "Roll up your sleeves! We'll prepare 4-5 traditional dishes together, learning techniques and stories behind each recipe.",
   },
   {
-    time: "7:30 PM",
     title: "Wood Oven Magic",
     description:
       "Watch as dishes are baked in our traditional wood-fired oven, the heart of Cretan cooking.",
   },
   {
-    time: "8:00 PM",
     title: "Dinner Together",
     description:
       "Sit down to enjoy the fruits of your labor with local wine, conversation, and Cretan hospitality.",
   },
   {
-    time: "9:30 PM",
     title: "Farewell",
     description:
       "Take home printed recipes and souvenirs to recreate the experience.",
@@ -107,6 +105,43 @@ const galleryImages = [
 ];
 
 export default function CoursesContent() {
+  const [timeSlots, setTimeSlots] = useState<MonthlyTimeSlot[] | null>(null);
+
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const response = await fetch("/api/preferences");
+        if (response.ok) {
+          const data = await response.json();
+          setTimeSlots(data.preferences.monthly_time_slots ?? DEFAULT_TIME_SLOTS);
+        }
+      } catch (error) {
+        console.error("Error fetching preferences:", error);
+      }
+    };
+    fetchPreferences();
+  }, []);
+
+  const currentMonth = new Date().getMonth() + 1;
+
+  const timeline = useMemo(() => {
+    const slots = timeSlots ?? DEFAULT_TIME_SLOTS;
+    const activeSlot = getTimeSlotForMonth(slots, currentMonth);
+    const startTime = activeSlot?.start_time ?? "17:30";
+    const computed = generateTimeline(startTime);
+
+    return computed.map((item, i) => ({
+      time: item.time,
+      ...timelineTitles[i],
+    }));
+  }, [timeSlots, currentMonth]);
+
+  const activeSlotLabel = useMemo(() => {
+    if (!timeSlots || timeSlots.length <= 1) return null;
+    const slot = getTimeSlotForMonth(timeSlots, currentMonth);
+    return slot?.label ?? null;
+  }, [timeSlots, currentMonth]);
+
   return (
     <div className="bg-[var(--color-cream)]">
       {/* Hero Section */}
@@ -238,6 +273,11 @@ export default function CoursesContent() {
             <p className="text-lg text-[var(--color-charcoal-light)] max-w-2xl mx-auto">
               Approximately 4 hours of cooking, learning, and feasting
             </p>
+            {activeSlotLabel && (
+              <p className="text-sm text-[var(--color-charcoal-light)] mt-2">
+                Times shown for {activeSlotLabel}. Times may vary by month.
+              </p>
+            )}
           </motion.div>
 
           <div className="relative">
@@ -383,7 +423,7 @@ export default function CoursesContent() {
               <Button
                 href="/contact"
                 size="lg"
-                className="bg-white text-[var(--color-secondary)] hover:bg-white/90"
+                className="bg-white !text-[var(--color-secondary)] hover:bg-white/90"
               >
                 Book Now
               </Button>

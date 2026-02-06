@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { DEFAULT_TIME_SLOTS } from '@/lib/timeSlots';
 
 export async function GET() {
   try {
@@ -23,6 +24,7 @@ export async function GET() {
             season_end_day: 9,
             available_days: [0, 1, 2, 3, 4, 5, 6],
             default_spots: 8,
+            monthly_time_slots: DEFAULT_TIME_SLOTS,
             updated_at: new Date().toISOString(),
           },
         });
@@ -34,6 +36,7 @@ export async function GET() {
       preferences: {
         ...data,
         default_spots: data.default_spots ?? 8,
+        monthly_time_slots: data.monthly_time_slots ?? DEFAULT_TIME_SLOTS,
       },
     });
   } catch (error) {
@@ -57,6 +60,7 @@ export async function PUT(request: NextRequest) {
       season_end_day,
       available_days,
       default_spots,
+      monthly_time_slots,
     } = body;
 
     // Validate input
@@ -103,6 +107,28 @@ export async function PUT(request: NextRequest) {
       );
     }
 
+    // Validate monthly_time_slots
+    if (monthly_time_slots !== undefined) {
+      if (!Array.isArray(monthly_time_slots)) {
+        return NextResponse.json(
+          { error: 'monthly_time_slots must be an array' },
+          { status: 400 }
+        );
+      }
+      const timeRegex = /^\d{2}:\d{2}$/;
+      for (const slot of monthly_time_slots) {
+        if (!slot.label || typeof slot.label !== 'string') {
+          return NextResponse.json({ error: 'Each time slot must have a label' }, { status: 400 });
+        }
+        if (!Array.isArray(slot.months) || !slot.months.every((m: number) => m >= 1 && m <= 12)) {
+          return NextResponse.json({ error: 'Invalid months in time slot' }, { status: 400 });
+        }
+        if (!timeRegex.test(slot.start_time) || !timeRegex.test(slot.end_time)) {
+          return NextResponse.json({ error: 'Time must be in HH:MM format' }, { status: 400 });
+        }
+      }
+    }
+
     // Upsert preferences (update if exists, insert if not)
     const { data, error } = await supabase
       .from('preferences')
@@ -114,6 +140,7 @@ export async function PUT(request: NextRequest) {
         season_end_day,
         available_days,
         default_spots: spots,
+        monthly_time_slots: monthly_time_slots ?? DEFAULT_TIME_SLOTS,
         updated_at: new Date().toISOString(),
       })
       .select()

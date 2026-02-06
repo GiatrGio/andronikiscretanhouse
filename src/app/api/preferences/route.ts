@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { DEFAULT_TIME_SLOTS } from '@/lib/timeSlots';
 
 export async function GET() {
   try {
@@ -24,6 +25,7 @@ export async function GET() {
             season_end_day: 9,
             available_days: [0, 1, 2, 3, 4, 5, 6],
             default_spots: 8,
+            monthly_time_slots: DEFAULT_TIME_SLOTS,
             updated_at: new Date().toISOString(),
           },
           dateOverrides: [],
@@ -57,6 +59,7 @@ export async function GET() {
       preferences: {
         ...preferences,
         default_spots: defaultSpots,
+        monthly_time_slots: preferences.monthly_time_slots ?? DEFAULT_TIME_SLOTS,
       },
       dateOverrides,
     });

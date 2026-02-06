@@ -313,7 +313,7 @@ export default function RecipeDetailContent({
             <Button
               href="/contact"
               size="lg"
-              className="bg-white text-[var(--color-primary)] hover:bg-white/90"
+              className="bg-white !text-[var(--color-primary)] hover:bg-white/90"
             >
               Book a Cooking Class
             </Button>

@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Menu, X, Phone } from "lucide-react";
-import { SITE_NAME, NAVIGATION_LINKS, CONTACT_INFO } from "@/lib/constants";
+import { Menu, X } from "lucide-react";
+import { SITE_NAME, NAVIGATION_LINKS } from "@/lib/constants";
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -37,8 +38,15 @@ export default function Header() {
           {/* Logo */}
           <Link
             href="/"
-            className="font-heading text-xl md:text-2xl font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors"
+            className="flex items-center gap-2 font-heading text-xl md:text-2xl font-bold text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors"
           >
+            <Image
+              src="/images/andronikiscretanhouse_logo.png"
+              alt="Androniki's Cretan House logo"
+              width={40}
+              height={40}
+              className="w-8 h-8 md:w-10 md:h-10 object-contain"
+            />
             {SITE_NAME}
           </Link>
 
@@ -58,15 +66,6 @@ export default function Header() {
               </Link>
             ))}
           </div>
-
-          {/* Phone number - Desktop */}
-          <a
-            href={`tel:${CONTACT_INFO.phone}`}
-            className="hidden md:flex items-center gap-2 text-sm font-medium text-[var(--color-secondary)] hover:text-[var(--color-secondary-dark)] transition-colors"
-          >
-            <Phone className="w-4 h-4" />
-            {CONTACT_INFO.phoneDisplay}
-          </a>
 
           {/* Mobile menu button */}
           <button
@@ -103,13 +102,6 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
-            <a
-              href={`tel:${CONTACT_INFO.phone}`}
-              className="flex items-center gap-2 px-4 py-3 text-base font-medium text-[var(--color-secondary)] hover:text-[var(--color-secondary-dark)] transition-colors"
-            >
-              <Phone className="w-5 h-5" />
-              {CONTACT_INFO.phoneDisplay}
-            </a>
           </div>
         </div>
       </nav>

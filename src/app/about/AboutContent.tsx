@@ -231,7 +231,7 @@ export default function AboutContent() {
             <Button
               href="/contact"
               size="lg"
-              className="bg-white text-[var(--color-primary)] hover:bg-white/90"
+              className="bg-white !text-[var(--color-primary)] hover:bg-white/90"
             >
               Get in Touch
             </Button>

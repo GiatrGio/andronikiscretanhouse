@@ -55,6 +55,46 @@ CREATE TRIGGER update_recipes_updated_at
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at_column();
 
+-- ============================================
+-- Preferences & Booking Availability
+-- ============================================
+
+-- Single-row table for site-wide booking preferences
+CREATE TABLE IF NOT EXISTS preferences (
+  id INTEGER PRIMARY KEY DEFAULT 1,
+  season_start_month INTEGER NOT NULL DEFAULT 4,
+  season_start_day INTEGER NOT NULL DEFAULT 20,
+  season_end_month INTEGER NOT NULL DEFAULT 10,
+  season_end_day INTEGER NOT NULL DEFAULT 9,
+  available_days INTEGER[] NOT NULL DEFAULT '{0,1,2,3,4,5,6}',
+  default_spots INTEGER NOT NULL DEFAULT 8,
+  monthly_time_slots JSONB DEFAULT '[{"label":"Default","months":[1,2,3,4,5,6,7,8,9,10,11,12],"start_time":"17:30","end_time":"21:30"}]',
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Per-date availability overrides
+CREATE TABLE IF NOT EXISTS date_overrides (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  date DATE UNIQUE NOT NULL,
+  available_spots INTEGER,
+  note TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- RLS policies for preferences (public read, auth write)
+ALTER TABLE preferences ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read preferences" ON preferences FOR SELECT USING (true);
+CREATE POLICY "Auth update preferences" ON preferences FOR ALL TO authenticated USING (true);
+
+-- RLS policies for date_overrides (public read, auth write)
+ALTER TABLE date_overrides ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Public read overrides" ON date_overrides FOR SELECT USING (true);
+CREATE POLICY "Auth manage overrides" ON date_overrides FOR ALL TO authenticated USING (true);
+
+-- Migration: Add monthly_time_slots to existing preferences table
+-- ALTER TABLE preferences ADD COLUMN IF NOT EXISTS monthly_time_slots JSONB
+--   DEFAULT '[{"label":"Default","months":[1,2,3,4,5,6,7,8,9,10,11,12],"start_time":"17:30","end_time":"21:30"}]';
+
 -- Note: After running this script, you also need to:
 -- 1. Create a storage bucket named 'recipe-images' with public access
 -- 2. Create an admin user via Authentication > Users > Add User

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import {
   Calendar,
@@ -14,6 +15,8 @@ import {
 } from "lucide-react";
 import Button from "@/components/ui/Button";
 import { COURSE_DETAILS } from "@/lib/constants";
+import type { MonthlyTimeSlot } from "@/lib/types/preferences";
+import { DEFAULT_TIME_SLOTS, formatTimeSlotRange, formatMonthRange } from "@/lib/timeSlots";
 
 const keyDetails = [
   {
@@ -85,6 +88,23 @@ const whatToBring = [
 ];
 
 export default function AvailabilityContent() {
+  const [timeSlots, setTimeSlots] = useState<MonthlyTimeSlot[] | null>(null);
+
+  useEffect(() => {
+    const fetchPreferences = async () => {
+      try {
+        const response = await fetch("/api/preferences");
+        if (response.ok) {
+          const data = await response.json();
+          setTimeSlots(data.preferences.monthly_time_slots ?? DEFAULT_TIME_SLOTS);
+        }
+      } catch (error) {
+        console.error("Error fetching preferences:", error);
+      }
+    };
+    fetchPreferences();
+  }, []);
+
   return (
     <div className="bg-[var(--color-cream)]">
       {/* Hero Section */}
@@ -150,8 +170,56 @@ export default function AvailabilityContent() {
         </div>
       </section>
 
+      {/* Course Times */}
+      {timeSlots && timeSlots.length > 0 && (
+        <section className="py-16 md:py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-4">
+                Course Times
+              </h2>
+              <p className="text-lg text-[var(--color-charcoal-light)] max-w-2xl mx-auto">
+                Times vary throughout the season
+              </p>
+            </motion.div>
+
+            <div className={`grid gap-6 max-w-3xl mx-auto ${timeSlots.length > 1 ? "md:grid-cols-2" : "md:grid-cols-1 max-w-md"}`}>
+              {timeSlots.map((slot, index) => (
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="bg-[var(--color-cream)] rounded-2xl p-6 text-center"
+                >
+                  <div className="w-16 h-16 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center mx-auto mb-4">
+                    <Clock className="w-8 h-8 text-[var(--color-primary)]" />
+                  </div>
+                  <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
+                    {slot.label}
+                  </h3>
+                  <p className="text-2xl font-bold text-[var(--color-primary)] mb-2">
+                    {formatTimeSlotRange(slot)}
+                  </p>
+                  <p className="text-sm text-[var(--color-charcoal-light)]">
+                    {formatMonthRange(slot.months)}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* What's Included */}
-      <section className="py-16 md:py-24 bg-white">
+      <section className={`py-16 md:py-24 ${timeSlots && timeSlots.length > 0 ? "" : "bg-white"}`}>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

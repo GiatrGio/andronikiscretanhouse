@@ -1,3 +1,10 @@
+export interface MonthlyTimeSlot {
+  label: string;
+  months: number[];
+  start_time: string; // "HH:mm" 24h format
+  end_time: string;   // "HH:mm" 24h format
+}
+
 export interface Preferences {
   id: number;
   season_start_month: number;
@@ -6,6 +13,7 @@ export interface Preferences {
   season_end_day: number;
   available_days: number[];
   default_spots: number;
+  monthly_time_slots: MonthlyTimeSlot[];
   updated_at: string;
 }
 
