@@ -1,9 +1,6 @@
-import { CONTACT_INFO, SITE_NAME, REVIEWS } from "@/lib/constants";
+import { CONTACT_INFO, SITE_NAME } from "@/lib/constants";
 
 export function LocalBusinessJsonLd() {
-  const averageRating =
-    REVIEWS.reduce((sum, review) => sum + review.rating, 0) / REVIEWS.length;
-
   const structuredData = {
     "@context": "https://schema.org",
     "@type": "LocalBusiness",
@@ -60,26 +57,11 @@ export function LocalBusinessJsonLd() {
     },
     aggregateRating: {
       "@type": "AggregateRating",
-      ratingValue: averageRating.toFixed(1),
-      reviewCount: REVIEWS.length,
+      ratingValue: "5.0",
+      reviewCount: 7,
       bestRating: "5",
       worstRating: "1",
     },
-    review: REVIEWS.slice(0, 3).map((review) => ({
-      "@type": "Review",
-      author: {
-        "@type": "Person",
-        name: review.name,
-      },
-      datePublished: review.date,
-      reviewRating: {
-        "@type": "Rating",
-        ratingValue: review.rating,
-        bestRating: "5",
-        worstRating: "1",
-      },
-      reviewBody: review.text,
-    })),
   };
 
   return (

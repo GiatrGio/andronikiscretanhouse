@@ -1,32 +1,106 @@
 "use client";
 
+import { useState, useEffect, useRef, useCallback } from "react";
 import { motion } from "framer-motion";
-import { Star, Quote, MapPin } from "lucide-react";
-import { REVIEWS } from "@/lib/constants";
+import { Quote, ExternalLink } from "lucide-react";
 import Button from "@/components/ui/Button";
 
-function StarRating({ rating }: { rating: number }) {
+interface Review {
+  id: string;
+  name: string;
+  review_date: string;
+  text: string;
+  source: string;
+  review_link: string;
+  is_featured: boolean;
+}
+
+function SourceLink({ source, link }: { source: string; link?: string }) {
+  if (link) {
+    return (
+      <a
+        href={link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-flex items-center gap-1 text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors"
+      >
+        {source}
+        <ExternalLink className="w-3.5 h-3.5" />
+      </a>
+    );
+  }
+  return <span>{source}</span>;
+}
+
+function formatDate(dateStr: string) {
+  const date = new Date(dateStr + "T00:00:00");
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function ReviewText({ text, className }: { text: string; className?: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [isClamped, setIsClamped] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
+
+  const checkClamp = useCallback(() => {
+    const el = textRef.current;
+    if (el) {
+      setIsClamped(el.scrollHeight > el.clientHeight + 1);
+    }
+  }, []);
+
+  useEffect(() => {
+    checkClamp();
+    window.addEventListener("resize", checkClamp);
+    return () => window.removeEventListener("resize", checkClamp);
+  }, [checkClamp, text]);
+
   return (
-    <div className="flex gap-1">
-      {[...Array(5)].map((_, i) => (
-        <Star
-          key={i}
-          className={`w-5 h-5 ${
-            i < rating
-              ? "fill-yellow-400 text-yellow-400"
-              : "fill-gray-200 text-gray-200"
-          }`}
-        />
-      ))}
+    <div>
+      <p
+        ref={textRef}
+        className={`${className || ""} ${!expanded ? "line-clamp-3" : ""}`}
+      >
+        &ldquo;{text}&rdquo;
+      </p>
+      {isClamped && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="text-sm text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] font-medium mt-1"
+        >
+          {expanded ? "Show less" : "Read more"}
+        </button>
+      )}
     </div>
   );
 }
 
 export default function ReviewsContent() {
-  const averageRating =
-    REVIEWS.reduce((sum, review) => sum + review.rating, 0) / REVIEWS.length;
-  const featuredReviews = REVIEWS.slice(0, 2);
-  const otherReviews = REVIEWS.slice(2);
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [heroText, setHeroText] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchData() {
+      try {
+        const response = await fetch("/api/reviews");
+        const data = await response.json();
+        setReviews(data.reviews || []);
+        setHeroText(data.heroText || "");
+      } catch (error) {
+        console.error("Error fetching reviews:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    fetchData();
+  }, []);
+
+  const featuredReviews = reviews.filter((r) => r.is_featured);
+  const otherReviews = reviews.filter((r) => !r.is_featured);
 
   return (
     <div className="bg-[var(--color-cream)]">
@@ -42,132 +116,124 @@ export default function ReviewsContent() {
             <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
               Our Reviews
             </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto mb-8">
-              See what our guests have to say about their Cretan cooking
-              experience
-            </p>
-
-            {/* Stats */}
-            <div className="flex flex-wrap justify-center gap-8">
-              <div className="text-center">
-                <div className="flex items-center justify-center gap-2 mb-2">
-                  <span className="text-4xl font-bold">
-                    {averageRating.toFixed(1)}
-                  </span>
-                  <Star className="w-8 h-8 fill-yellow-400 text-yellow-400" />
-                </div>
-                <p className="text-white/80">Average Rating</p>
-              </div>
-              <div className="text-center">
-                <p className="text-4xl font-bold mb-2">{REVIEWS.length}+</p>
-                <p className="text-white/80">Happy Guests</p>
-              </div>
-              <div className="text-center">
-                <p className="text-4xl font-bold mb-2">100%</p>
-                <p className="text-white/80">5-Star Reviews</p>
-              </div>
-            </div>
+            {heroText && (
+              <p className="text-lg text-white/90 max-w-3xl mx-auto italic whitespace-pre-line">
+                {heroText}
+              </p>
+            )}
           </motion.div>
         </div>
       </section>
 
       {/* Featured Reviews */}
-      <section className="py-16 md:py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-4">
-              Featured Reviews
-            </h2>
-          </motion.div>
+      {featuredReviews.length > 0 && (
+        <section className="py-16 md:py-24">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-4">
+                Featured Reviews
+              </h2>
+            </motion.div>
 
-          <div className="grid md:grid-cols-2 gap-8">
-            {featuredReviews.map((review, index) => (
-              <motion.div
-                key={review.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-white rounded-2xl shadow-lg p-8 relative"
-              >
-                <Quote className="absolute top-6 right-6 w-12 h-12 text-[var(--color-primary)]/10" />
-                <StarRating rating={review.rating} />
-                <p className="text-lg text-[var(--color-charcoal)] mt-4 mb-6 leading-relaxed">
-                  "{review.text}"
-                </p>
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-bold text-[var(--color-charcoal)]">
-                      {review.name}
-                    </p>
-                    <p className="text-sm text-[var(--color-charcoal-light)]">
-                      {review.date}
-                    </p>
+            <div className="grid md:grid-cols-2 gap-8">
+              {featuredReviews.map((review, index) => (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="bg-white rounded-2xl shadow-lg p-8 relative"
+                >
+                  <Quote className="absolute top-6 right-6 w-12 h-12 text-[var(--color-primary)]/10" />
+                  <ReviewText
+                    text={review.text}
+                    className="text-lg text-[var(--color-charcoal)] mt-4 mb-6 leading-relaxed"
+                  />
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="font-bold text-[var(--color-charcoal)]">
+                        {review.name}
+                      </p>
+                      <p className="text-sm text-[var(--color-charcoal-light)]">
+                        {formatDate(review.review_date)}
+                      </p>
+                    </div>
+                    <span className="text-sm">
+                      <SourceLink source={review.source} link={review.review_link} />
+                    </span>
                   </div>
-                  <div className="flex items-center gap-1 text-sm text-[var(--color-charcoal-light)]">
-                    <MapPin className="w-4 h-4" />
-                    {review.country}
-                  </div>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
-      {/* All Reviews */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-4">
-              More Reviews
-            </h2>
-          </motion.div>
+      {/* More Reviews */}
+      {otherReviews.length > 0 && (
+        <section className="py-16 md:py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-4">
+                More Reviews
+              </h2>
+            </motion.div>
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {otherReviews.map((review, index) => (
-              <motion.div
-                key={review.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.05 }}
-                className="bg-[var(--color-cream)] rounded-xl p-6"
-              >
-                <StarRating rating={review.rating} />
-                <p className="text-[var(--color-charcoal)] mt-3 mb-4 line-clamp-4">
-                  "{review.text}"
-                </p>
-                <div className="flex items-center justify-between text-sm">
-                  <div>
-                    <p className="font-medium text-[var(--color-charcoal)]">
-                      {review.name}
-                    </p>
-                    <p className="text-[var(--color-charcoal-light)]">
-                      {review.date}
-                    </p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {otherReviews.map((review, index) => (
+                <motion.div
+                  key={review.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.05 }}
+                  className="bg-[var(--color-cream)] rounded-xl p-6"
+                >
+                  <ReviewText
+                    text={review.text}
+                    className="text-[var(--color-charcoal)] mt-3 mb-4"
+                  />
+                  <div className="flex items-center justify-between text-sm">
+                    <div>
+                      <p className="font-medium text-[var(--color-charcoal)]">
+                        {review.name}
+                      </p>
+                      <p className="text-[var(--color-charcoal-light)]">
+                        {formatDate(review.review_date)}
+                      </p>
+                    </div>
+                    <span className="text-sm">
+                      <SourceLink source={review.source} link={review.review_link} />
+                    </span>
                   </div>
-                  <span className="text-[var(--color-charcoal-light)]">
-                    {review.country}
-                  </span>
-                </div>
-              </motion.div>
-            ))}
+                </motion.div>
+              ))}
+            </div>
           </div>
+        </section>
+      )}
+
+      {/* Loading state */}
+      {isLoading && (
+        <div className="py-24 text-center">
+          <p className="text-[var(--color-charcoal-light)]">
+            Loading reviews...
+          </p>
         </div>
-      </section>
+      )}
 
       {/* Leave a Review CTA */}
       <section className="py-16 md:py-24">
@@ -183,7 +249,7 @@ export default function ReviewsContent() {
               Been Our Guest?
             </h2>
             <p className="text-white/90 mb-8">
-              We'd love to hear about your experience! Leave us a review on
+              We&apos;d love to hear about your experience! Leave us a review on
               TripAdvisor or Google.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
