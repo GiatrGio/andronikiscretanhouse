@@ -13,6 +13,7 @@ export default function HomePage() {
         ctaHref="/contact"
         secondaryCtaText="View Courses"
         secondaryCtaHref="/courses"
+        backgroundImage="/images/page/homepage_1.jpg"
       />
       <FeaturedCards />
       <QuickInfo />
