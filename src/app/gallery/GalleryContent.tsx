@@ -1,97 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Camera, Filter } from "lucide-react";
+import { Filter } from "lucide-react";
+import Image from "next/image";
 import { Lightbox } from "@/components/ui/Modal";
 import Button from "@/components/ui/Button";
 
-const categories = ["All", "The Garden", "Cooking", "Our Dishes", "Happy Guests", "The Venue"];
-
-const galleryImages = [
-  {
-    id: 1,
-    src: "/images/placeholder-1.jpg",
-    alt: "Beautiful Cretan courtyard",
-    category: "The Venue",
-  },
-  {
-    id: 2,
-    src: "/images/placeholder-2.jpg",
-    alt: "Hands-on cooking experience",
-    category: "Cooking",
-  },
-  {
-    id: 3,
-    src: "/images/placeholder-3.jpg",
-    alt: "Traditional wood-fired oven",
-    category: "The Venue",
-  },
-  {
-    id: 4,
-    src: "/images/placeholder-4.jpg",
-    alt: "Fresh herbs from the garden",
-    category: "The Garden",
-  },
-  {
-    id: 5,
-    src: "/images/placeholder-5.jpg",
-    alt: "Delicious moussaka",
-    category: "Our Dishes",
-  },
-  {
-    id: 6,
-    src: "/images/placeholder-6.jpg",
-    alt: "Happy guests at the table",
-    category: "Happy Guests",
-  },
-  {
-    id: 7,
-    src: "/images/placeholder-7.jpg",
-    alt: "Organic vegetable garden",
-    category: "The Garden",
-  },
-  {
-    id: 8,
-    src: "/images/placeholder-8.jpg",
-    alt: "Making traditional bread",
-    category: "Cooking",
-  },
-  {
-    id: 9,
-    src: "/images/placeholder-9.jpg",
-    alt: "Traditional dakos salad",
-    category: "Our Dishes",
-  },
-  {
-    id: 10,
-    src: "/images/placeholder-10.jpg",
-    alt: "Guests learning to cook",
-    category: "Happy Guests",
-  },
-  {
-    id: 11,
-    src: "/images/placeholder-11.jpg",
-    alt: "Olive trees in the garden",
-    category: "The Garden",
-  },
-  {
-    id: 12,
-    src: "/images/placeholder-12.jpg",
-    alt: "Fresh homemade cheese",
-    category: "Our Dishes",
-  },
-];
+interface GalleryPhoto {
+  id: string;
+  title: string;
+  category: string;
+  image_url: string;
+}
 
 export default function GalleryContent() {
+  const [photos, setPhotos] = useState<GalleryPhoto[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState("All");
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
 
+  useEffect(() => {
+    const loadPhotos = async () => {
+      try {
+        const response = await fetch("/api/gallery");
+        const data = await response.json();
+        setPhotos(data.photos || []);
+      } catch (error) {
+        console.error("Error loading gallery photos:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadPhotos();
+  }, []);
+
+  const categories = [
+    "All",
+    ...Array.from(new Set(photos.map((p) => p.category))),
+  ];
+
   const filteredImages =
     selectedCategory === "All"
-      ? galleryImages
-      : galleryImages.filter((img) => img.category === selectedCategory);
+      ? photos
+      : photos.filter((img) => img.category === selectedCategory);
 
   const openLightbox = (index: number) => {
     setCurrentImageIndex(index);
@@ -160,39 +113,51 @@ export default function GalleryContent() {
       {/* Gallery Grid */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            layout
-            className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
-          >
-            <AnimatePresence mode="popLayout">
-              {filteredImages.map((image, index) => (
-                <motion.div
-                  key={image.id}
-                  layout
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.9 }}
-                  transition={{ duration: 0.3, delay: index * 0.03 }}
-                >
-                  <button
-                    onClick={() => openLightbox(index)}
-                    className="relative aspect-square w-full overflow-hidden rounded-xl bg-[var(--color-primary)]/10 group cursor-pointer"
+          {isLoading ? (
+            <div className="text-center py-12">
+              <p className="text-[var(--color-charcoal-light)]">
+                Loading gallery...
+              </p>
+            </div>
+          ) : (
+            <motion.div
+              layout
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4"
+            >
+              <AnimatePresence mode="popLayout">
+                {filteredImages.map((image, index) => (
+                  <motion.div
+                    key={image.id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3, delay: index * 0.03 }}
                   >
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <Camera className="w-12 h-12 text-[var(--color-primary)]/30 group-hover:scale-110 transition-transform" />
-                    </div>
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-start p-4">
-                      <p className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                        {image.alt}
-                      </p>
-                    </div>
-                  </button>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
+                    <button
+                      onClick={() => openLightbox(index)}
+                      className="relative aspect-square w-full overflow-hidden rounded-xl bg-[var(--color-primary)]/10 group cursor-pointer"
+                    >
+                      <Image
+                        src={image.image_url}
+                        alt={image.title}
+                        fill
+                        className="object-cover group-hover:scale-105 transition-transform duration-300"
+                        sizes="(max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                      />
+                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-start p-4">
+                        <p className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                          {image.title}
+                        </p>
+                      </div>
+                    </button>
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
 
-          {filteredImages.length === 0 && (
+          {!isLoading && filteredImages.length === 0 && (
             <div className="text-center py-12">
               <p className="text-[var(--color-charcoal-light)]">
                 No images found in this category.
@@ -206,8 +171,8 @@ export default function GalleryContent() {
       <Lightbox
         isOpen={lightboxOpen}
         onClose={() => setLightboxOpen(false)}
-        imageSrc={filteredImages[currentImageIndex]?.src || ""}
-        imageAlt={filteredImages[currentImageIndex]?.alt || ""}
+        imageSrc={filteredImages[currentImageIndex]?.image_url || ""}
+        imageAlt={filteredImages[currentImageIndex]?.title || ""}
         onPrevious={goToPrevious}
         onNext={goToNext}
         hasPrevious={filteredImages.length > 1}

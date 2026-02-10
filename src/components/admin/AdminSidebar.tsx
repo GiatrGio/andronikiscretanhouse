@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { TrendingUp, ChefHat, LogOut, Settings, MessageSquareQuote } from "lucide-react";
+import { TrendingUp, ChefHat, LogOut, Settings, MessageSquareQuote, ImagePlus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const menuItems = [
@@ -20,6 +20,11 @@ const menuItems = [
     label: "Reviews Dashboard",
     href: "/admin/reviews",
     icon: MessageSquareQuote,
+  },
+  {
+    label: "Photo Gallery",
+    href: "/admin/gallery",
+    icon: ImagePlus,
   },
   {
     label: "Preferences",

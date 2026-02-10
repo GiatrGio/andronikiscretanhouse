@@ -1,6 +1,7 @@
 import { createAdminClient } from './admin';
 
 const BUCKET_NAME = 'recipe-images';
+const GALLERY_BUCKET_NAME = 'gallery-images';
 
 export async function uploadImage(
   file: File,
@@ -104,4 +105,48 @@ export async function deleteRecipeImages(recipeId: number): Promise<boolean> {
 
 export function getStorageUrl(path: string): string {
   return `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/${BUCKET_NAME}/${path}`;
+}
+
+// Gallery storage functions
+
+export async function uploadGalleryImage(
+  buffer: Buffer,
+  path: string,
+  contentType: string
+): Promise<string | null> {
+  const supabase = createAdminClient();
+
+  const { data, error } = await supabase.storage
+    .from(GALLERY_BUCKET_NAME)
+    .upload(path, buffer, {
+      cacheControl: '3600',
+      upsert: true,
+      contentType,
+    });
+
+  if (error) {
+    console.error('Error uploading gallery image:', error);
+    return null;
+  }
+
+  const { data: urlData } = supabase.storage
+    .from(GALLERY_BUCKET_NAME)
+    .getPublicUrl(data.path);
+
+  return urlData.publicUrl;
+}
+
+export async function deleteGalleryImage(path: string): Promise<boolean> {
+  const supabase = createAdminClient();
+
+  const { error } = await supabase.storage
+    .from(GALLERY_BUCKET_NAME)
+    .remove([path]);
+
+  if (error) {
+    console.error('Error deleting gallery image:', error);
+    return false;
+  }
+
+  return true;
 }
