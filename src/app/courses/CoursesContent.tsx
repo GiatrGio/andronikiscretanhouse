@@ -13,6 +13,7 @@ import {
   UtensilsCrossed,
 } from "lucide-react";
 import Button from "@/components/ui/Button";
+import CourseImageCarousel from "@/components/CourseImageCarousel";
 import type { MonthlyTimeSlot } from "@/lib/types/preferences";
 import { DEFAULT_TIME_SLOTS, getTimeSlotForMonth, generateTimeline } from "@/lib/timeSlots";
 
@@ -203,11 +204,9 @@ export default function CoursesContent() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative aspect-[4/3] rounded-2xl overflow-hidden shadow-xl"
+              className="shadow-xl"
             >
-              <div className="absolute inset-0 bg-[var(--color-primary)]/20 flex items-center justify-center">
-                <ChefHat className="w-24 h-24 text-[var(--color-primary)]/50" />
-              </div>
+              <CourseImageCarousel />
             </motion.div>
           </div>
         </div>

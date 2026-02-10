@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { Heart, Leaf, Users, Award } from "lucide-react";
 import Button from "@/components/ui/Button";
 
@@ -95,9 +96,15 @@ export default function AboutContent() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="order-1 lg:order-2 relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-primary)]/10 flex items-center justify-center"
+              className="order-1 lg:order-2 relative aspect-[4/3] rounded-2xl overflow-hidden"
             >
-              <Users className="w-24 h-24 text-[var(--color-primary)]/30" />
+              <Image
+                src="/images/about/about_1.jpg"
+                alt="Androniki and Pantelis"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
             </motion.div>
           </div>
         </div>
@@ -146,26 +153,6 @@ export default function AboutContent() {
         </div>
       </section>
 
-      {/* Quote Section */}
-      <section className="py-16 md:py-24 bg-[var(--color-accent)]">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <motion.blockquote
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-          >
-            <p className="font-heading text-2xl md:text-3xl lg:text-4xl font-bold text-white leading-relaxed mb-6">
-              "Food is not just nourishment—it's history, culture, and love on
-              a plate. We want every guest to taste the soul of Crete."
-            </p>
-            <footer className="text-white/80 text-lg">
-              — Androniki & Pantelis
-            </footer>
-          </motion.blockquote>
-        </div>
-      </section>
-
       {/* Our Home */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -175,9 +162,15 @@ export default function AboutContent() {
               whileInView={{ opacity: 1, x: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
-              className="relative aspect-[4/3] rounded-2xl overflow-hidden bg-[var(--color-primary)]/10 flex items-center justify-center"
+              className="relative aspect-[4/3] rounded-2xl overflow-hidden"
             >
-              <Leaf className="w-24 h-24 text-[var(--color-primary)]/30" />
+              <Image
+                src="/images/about/about_2.jpg"
+                alt="Our traditional Cretan home"
+                fill
+                className="object-cover"
+                sizes="(max-width: 1024px) 100vw, 50vw"
+              />
             </motion.div>
             <motion.div
               initial={{ opacity: 0, x: 30 }}
