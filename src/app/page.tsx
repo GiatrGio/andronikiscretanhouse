@@ -10,7 +10,7 @@ export default function HomePage() {
         title="Greek Cooking Lessons"
         subtitle="Dining In Rethymno: An Evening Of Cretan Cooking. Experience authentic Cretan cuisine in our family courtyard with traditional wood-fired oven."
         ctaText="Book Your Experience"
-        ctaHref="/contact"
+        ctaHref="/book-now"
         secondaryCtaText="View Courses"
         secondaryCtaHref="/courses"
         backgroundImage="/images/page/homepage_1.jpg"

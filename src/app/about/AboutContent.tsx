@@ -35,26 +35,6 @@ const values = [
 export default function AboutContent() {
   return (
     <div className="bg-[var(--color-cream)]">
-      {/* Hero Section */}
-      <section className="relative py-20 md:py-32 bg-[var(--color-primary)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white"
-          >
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              About Us
-            </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Meet Androniki & Pantelis, your hosts for an authentic Cretan
-              experience
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Our Story */}
       <section className="py-16 md:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

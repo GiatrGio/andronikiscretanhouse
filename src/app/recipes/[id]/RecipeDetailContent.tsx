@@ -311,7 +311,7 @@ export default function RecipeDetailContent({
               meal together.
             </p>
             <Button
-              href="/contact"
+              href="/book-now"
               size="lg"
               className="bg-white !text-[var(--color-primary)] hover:bg-white/90"
             >

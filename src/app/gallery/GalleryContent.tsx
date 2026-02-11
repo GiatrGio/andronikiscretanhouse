@@ -65,26 +65,6 @@ export default function GalleryContent() {
 
   return (
     <div className="bg-[var(--color-cream)]">
-      {/* Hero Section */}
-      <section className="relative py-20 md:py-32 bg-[var(--color-primary)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white"
-          >
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Photo Gallery
-            </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              A glimpse into the magic of our cooking classes and the beauty of
-              Cretan hospitality
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Filter Section */}
       <section className="py-8 bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -195,9 +175,9 @@ export default function GalleryContent() {
               Join us for an authentic Cretan cooking experience
             </p>
             <Button
-              href="/contact"
+              href="/book-now"
               size="lg"
-              className="bg-white text-[var(--color-secondary)] hover:bg-white/90"
+              className="bg-white !text-[var(--color-secondary)] hover:bg-white/90"
             >
               Book Your Experience
             </Button>

@@ -16,11 +16,11 @@ const features = [
   },
   {
     icon: Calendar,
-    title: "Availability & Details",
+    title: "Book Now",
     description:
       "Classes run April 20th to October 9th. Maximum 8 guests for mixed groups, or up to 12 for private family gatherings.",
-    href: "/courses/availability",
-    ctaText: "Check Availability",
+    href: "/book-now",
+    ctaText: "Book Your Experience",
   },
   {
     icon: Star,

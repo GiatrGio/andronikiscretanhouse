@@ -37,26 +37,6 @@ export default function RecipesContent({ recipes }: RecipesContentProps) {
 
   return (
     <div className="bg-[var(--color-cream)]">
-      {/* Hero Section */}
-      <section className="relative py-20 md:py-32 bg-[var(--color-primary)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white"
-          >
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Greek Traditional Recipes
-            </h1>
-            <p className="text-xl text-white/90 max-w-3xl mx-auto">
-              Discover the authentic flavors of Crete with recipes passed down
-              through generations
-            </p>
-          </motion.div>
-        </div>
-      </section>
-
       {/* Filter Section */}
       <section className="py-8 bg-white border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

@@ -13,12 +13,12 @@ export const CONTACT_INFO = {
 export const NAVIGATION_LINKS = [
   { href: "/", label: "Home" },
   { href: "/courses", label: "Courses" },
-  { href: "/courses/availability", label: "Availability" },
   { href: "/about", label: "About Us" },
   { href: "/recipes", label: "Recipes" },
   { href: "/reviews", label: "Reviews" },
   { href: "/gallery", label: "Gallery" },
   { href: "/contact", label: "Contact" },
+  { href: "/book-now", label: "Book Now" },
 ];
 
 export const COURSE_DETAILS = {

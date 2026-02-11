@@ -80,7 +80,6 @@ function ReviewText({ text, className }: { text: string; className?: string }) {
 
 export default function ReviewsContent() {
   const [reviews, setReviews] = useState<Review[]>([]);
-  const [heroText, setHeroText] = useState("");
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -89,7 +88,6 @@ export default function ReviewsContent() {
         const response = await fetch("/api/reviews");
         const data = await response.json();
         setReviews(data.reviews || []);
-        setHeroText(data.heroText || "");
       } catch (error) {
         console.error("Error fetching reviews:", error);
       } finally {
@@ -104,27 +102,6 @@ export default function ReviewsContent() {
 
   return (
     <div className="bg-[var(--color-cream)]">
-      {/* Hero Section */}
-      <section className="relative py-20 md:py-32 bg-[var(--color-primary)]">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="text-center text-white"
-          >
-            <h1 className="font-heading text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Our Reviews
-            </h1>
-            {heroText && (
-              <p className="text-lg text-white/90 max-w-3xl mx-auto italic whitespace-pre-line">
-                {heroText}
-              </p>
-            )}
-          </motion.div>
-        </div>
-      </section>
-
       {/* Featured Reviews */}
       {featuredReviews.length > 0 && (
         <section className="py-16 md:py-24">
@@ -255,7 +232,7 @@ export default function ReviewsContent() {
             <div className="flex flex-col sm:flex-row gap-4 justify-center">
               <Button
                 href="/contact"
-                className="bg-white text-[var(--color-primary)] hover:bg-white/90"
+                className="bg-white !text-[var(--color-primary)] hover:bg-white/90"
               >
                 Get in Touch
               </Button>
@@ -280,9 +257,9 @@ export default function ReviewsContent() {
               Join us for an unforgettable Cretan cooking experience
             </p>
             <Button
-              href="/contact"
+              href="/book-now"
               size="lg"
-              className="bg-white text-[var(--color-secondary)] hover:bg-white/90"
+              className="bg-white !text-[var(--color-secondary)] hover:bg-white/90"
             >
               Book Your Experience
             </Button>
