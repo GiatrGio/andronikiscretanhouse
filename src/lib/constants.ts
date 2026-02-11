@@ -18,7 +18,7 @@ export const NAVIGATION_LINKS = [
   { href: "/reviews", label: "Reviews" },
   { href: "/gallery", label: "Gallery" },
   { href: "/contact", label: "Contact" },
-  { href: "/book-now", label: "Book Now" },
+  { href: "/book-now", label: "Book" },
 ];
 
 export const COURSE_DETAILS = {

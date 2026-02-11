@@ -6,10 +6,15 @@ import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
 import { SITE_NAME, NAVIGATION_LINKS } from "@/lib/constants";
 
+const BOOK_HREF = "/book-now";
+
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const pathname = usePathname();
+
+  const regularLinks = NAVIGATION_LINKS.filter((l) => l.href !== BOOK_HREF);
+  const bookLink = NAVIGATION_LINKS.find((l) => l.href === BOOK_HREF);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -44,7 +49,7 @@ export default function Header() {
 
           {/* Desktop Navigation */}
           <div className="hidden lg:flex items-center gap-1">
-            {NAVIGATION_LINKS.map((link) => (
+            {regularLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -57,21 +62,47 @@ export default function Header() {
                 {link.label}
               </Link>
             ))}
+            {bookLink && (
+              <Link
+                href={bookLink.href}
+                className={`ml-2 px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname === bookLink.href
+                    ? "bg-[var(--color-secondary-dark)] text-white"
+                    : "bg-[var(--color-secondary)] text-white hover:bg-[var(--color-secondary-dark)]"
+                }`}
+              >
+                {bookLink.label}
+              </Link>
+            )}
           </div>
 
-          {/* Mobile menu button */}
-          <button
-            onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="lg:hidden p-2 rounded-md text-[var(--color-charcoal)] hover:bg-[var(--color-cream-dark)] transition-colors"
-            aria-label={isMenuOpen ? "Close menu" : "Open menu"}
-            aria-expanded={isMenuOpen}
-          >
-            {isMenuOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
+          {/* Mobile: Book button + hamburger */}
+          <div className="flex items-center gap-2 lg:hidden">
+            {bookLink && (
+              <Link
+                href={bookLink.href}
+                className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
+                  pathname === bookLink.href
+                    ? "bg-[var(--color-secondary-dark)] text-white"
+                    : "bg-[var(--color-secondary)] text-white hover:bg-[var(--color-secondary-dark)]"
+                }`}
+              >
+                {bookLink.label}
+              </Link>
             )}
-          </button>
+            <button
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="p-2 rounded-md text-[var(--color-charcoal)] hover:bg-[var(--color-cream-dark)] transition-colors"
+              aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={isMenuOpen}
+            >
+              {isMenuOpen ? (
+                <X className="w-6 h-6" />
+              ) : (
+                <Menu className="w-6 h-6" />
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Mobile Navigation */}
@@ -81,7 +112,7 @@ export default function Header() {
           }`}
         >
           <div className="py-4 space-y-1 border-t border-[var(--color-cream-dark)]">
-            {NAVIGATION_LINKS.map((link) => (
+            {regularLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
