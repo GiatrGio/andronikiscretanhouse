@@ -29,6 +29,7 @@ export async function getAllRecipes(): Promise<RecipeSummary[]> {
   const { data, error } = await supabase
     .from('recipes')
     .select('id, data')
+    .eq('published', true)
     .order('id', { ascending: true });
 
   if (error) {
@@ -62,6 +63,7 @@ export async function getRecipeById(id: number): Promise<Recipe | null> {
     .from('recipes')
     .select('id, data')
     .eq('id', id)
+    .eq('published', true)
     .single();
 
   if (error || !data) {

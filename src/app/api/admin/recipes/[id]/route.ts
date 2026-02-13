@@ -81,6 +81,37 @@ export async function DELETE(
   }
 }
 
+// PATCH - Toggle published status
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  try {
+    const { id } = await params;
+    const recipeId = Number(id);
+    const supabase = createAdminClient();
+
+    const { published } = await request.json();
+
+    const { error } = await supabase
+      .from('recipes')
+      .update({ published })
+      .eq('id', recipeId);
+
+    if (error) {
+      throw error;
+    }
+
+    return NextResponse.json({ success: true, published });
+  } catch (error) {
+    console.error('Error updating published status:', error);
+    return NextResponse.json(
+      { error: 'Failed to update published status' },
+      { status: 500 }
+    );
+  }
+}
+
 // PUT - Update a recipe
 export async function PUT(
   request: NextRequest,

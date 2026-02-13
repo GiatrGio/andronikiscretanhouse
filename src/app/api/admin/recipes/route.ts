@@ -8,7 +8,7 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from('recipes')
-      .select('id, data, created_at, updated_at')
+      .select('id, data, published, created_at, updated_at')
       .order('id', { ascending: true });
 
     if (error) {
@@ -18,6 +18,7 @@ export async function GET() {
     const recipes = data.map((row) => ({
       id: row.id,
       ...row.data,
+      published: row.published,
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));

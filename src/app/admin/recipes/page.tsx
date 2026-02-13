@@ -15,6 +15,7 @@ interface RecipeWithId {
   summary: string;
   category: string;
   main_photo: string;
+  published: boolean;
   updated_at?: string;
 }
 
@@ -93,10 +94,56 @@ export default function RecipesDashboard() {
     setEditRecipeId(null);
   };
 
+  const togglePublished = async (index: number) => {
+    const recipe = recipes[index];
+    const newPublished = !recipe.published;
+
+    // Optimistic update
+    setRecipes(prev =>
+      prev.map((r, i) => (i === index ? { ...r, published: newPublished } : r))
+    );
+
+    try {
+      const response = await fetch(`/api/admin/recipes/${recipe.id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ published: newPublished }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to update published status');
+      }
+    } catch (error) {
+      console.error('Error toggling published:', error);
+      // Revert on failure
+      setRecipes(prev =>
+        prev.map((r, i) => (i === index ? { ...r, published: recipe.published } : r))
+      );
+    }
+  };
+
   // Transform recipes for table display
-  const recipeData = recipes.map(recipe => ({
+  const recipeData = recipes.map((recipe, index) => ({
     name: recipe.title,
     category: recipe.category,
+    published: (
+      <button
+        onClick={(e) => {
+          e.stopPropagation();
+          togglePublished(index);
+        }}
+        className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+          recipe.published ? 'bg-green-500' : 'bg-gray-300'
+        }`}
+        title={recipe.published ? 'Published - click to unpublish' : 'Unpublished - click to publish'}
+      >
+        <span
+          className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+            recipe.published ? 'translate-x-6' : 'translate-x-1'
+          }`}
+        />
+      </button>
+    ),
     lastUpdated: recipe.updated_at
       ? new Date(recipe.updated_at).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0],
@@ -105,6 +152,7 @@ export default function RecipesDashboard() {
   const columns = [
     { key: "name", label: "Recipe Name", className: "font-medium" },
     { key: "category", label: "Category" },
+    { key: "published", label: "Published" },
     { key: "lastUpdated", label: "Last Updated", className: "text-[var(--color-charcoal-light)]" },
   ];
 
