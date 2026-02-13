@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { Clock, ChefHat, Filter } from "lucide-react";
+import { ChefHat, Filter } from "lucide-react";
 import { RecipeSummary } from "@/lib/constants";
 import Button from "@/components/ui/Button";
 
@@ -16,12 +16,6 @@ const categories = [
   "Preserves",
   "Desserts",
 ];
-
-const difficultyColors = {
-  Easy: "bg-green-100 text-green-800",
-  Medium: "bg-yellow-100 text-yellow-800",
-  Hard: "bg-red-100 text-red-800",
-};
 
 interface RecipesContentProps {
   recipes: RecipeSummary[];
@@ -105,21 +99,6 @@ export default function RecipesContent({ recipes }: RecipesContentProps) {
                       <p className="text-sm text-[var(--color-charcoal-light)] mb-4 line-clamp-2">
                         {recipe.summary}
                       </p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1 text-sm text-[var(--color-charcoal-light)]">
-                          <Clock className="w-4 h-4" />
-                          {recipe.preparation_time}
-                        </div>
-                        <span
-                          className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            difficultyColors[
-                              recipe.difficulty as keyof typeof difficultyColors
-                            ]
-                          }`}
-                        >
-                          {recipe.difficulty}
-                        </span>
-                      </div>
                     </div>
                   </Link>
                 </motion.div>

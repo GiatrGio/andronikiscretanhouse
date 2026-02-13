@@ -13,8 +13,6 @@ interface RecipeWithId {
   slug: string;
   title: string;
   summary: string;
-  preparation_time: string;
-  difficulty: "Easy" | "Medium" | "Hard";
   category: string;
   main_photo: string;
   updated_at?: string;
@@ -98,8 +96,6 @@ export default function RecipesDashboard() {
   // Transform recipes for table display
   const recipeData = recipes.map(recipe => ({
     name: recipe.title,
-    views: "N/A",
-    difficulty: recipe.difficulty,
     category: recipe.category,
     lastUpdated: recipe.updated_at
       ? new Date(recipe.updated_at).toISOString().split('T')[0]
@@ -108,8 +104,6 @@ export default function RecipesDashboard() {
 
   const columns = [
     { key: "name", label: "Recipe Name", className: "font-medium" },
-    { key: "views", label: "Views" },
-    { key: "difficulty", label: "Difficulty" },
     { key: "category", label: "Category" },
     { key: "lastUpdated", label: "Last Updated", className: "text-[var(--color-charcoal-light)]" },
   ];

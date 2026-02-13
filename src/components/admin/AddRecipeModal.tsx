@@ -32,9 +32,6 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
   const [title, setTitle] = useState("");
   const [slug, setSlug] = useState("");
   const [summary, setSummary] = useState("");
-  const [preparationTime, setPreparationTime] = useState("");
-  const [serves, setServes] = useState("");
-  const [difficulty, setDifficulty] = useState<"Easy" | "Medium" | "Hard">("Easy");
   const [category, setCategory] = useState("");
   const [mainPhoto, setMainPhoto] = useState<File | null>(null);
 
@@ -165,9 +162,6 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
       setTitle(recipe.title);
       setSlug(recipe.slug);
       setSummary(recipe.summary);
-      setPreparationTime(recipe.preparation_time);
-      setServes(recipe.serves);
-      setDifficulty(recipe.difficulty);
       setCategory(recipe.category);
 
       // Populate ingredients
@@ -207,9 +201,6 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
       formData.append("title", title);
       formData.append("slug", slug);
       formData.append("summary", summary);
-      formData.append("preparation_time", preparationTime);
-      formData.append("serves", serves);
-      formData.append("difficulty", difficulty);
       formData.append("category", category);
 
       // Add main photo
@@ -271,9 +262,6 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
     setTitle("");
     setSlug("");
     setSummary("");
-    setPreparationTime("");
-    setServes("");
-    setDifficulty("Easy");
     setCategory("");
     setMainPhoto(null);
     setIngredientGroups([{ group: "", items: [""] }]);
@@ -369,56 +357,16 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                   />
                 </div>
 
-                <div className="grid md:grid-cols-4 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Prep Time *</label>
-                    <input
-                      type="text"
-                      value={preparationTime}
-                      onChange={(e) => setPreparationTime(e.target.value)}
-                      placeholder="e.g., 30 min"
-                      required
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Serves *</label>
-                    <input
-                      type="text"
-                      value={serves}
-                      onChange={(e) => setServes(e.target.value)}
-                      placeholder="e.g., 4-6"
-                      required
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Difficulty *</label>
-                    <select
-                      value={difficulty}
-                      onChange={(e) => setDifficulty(e.target.value as "Easy" | "Medium" | "Hard")}
-                      required
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
-                    >
-                      <option value="Easy">Easy</option>
-                      <option value="Medium">Medium</option>
-                      <option value="Hard">Hard</option>
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Category *</label>
-                    <input
-                      type="text"
-                      value={category}
-                      onChange={(e) => setCategory(e.target.value)}
-                      placeholder="e.g., Main Courses"
-                      required
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Category *</label>
+                  <input
+                    type="text"
+                    value={category}
+                    onChange={(e) => setCategory(e.target.value)}
+                    placeholder="e.g., Main Courses"
+                    required
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                  />
                 </div>
 
                 <div>

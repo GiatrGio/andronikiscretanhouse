@@ -47,14 +47,11 @@ export interface RecipeSummary {
   slug: string;
   title: string;
   summary: string;
-  preparation_time: string;
-  difficulty: "Easy" | "Medium" | "Hard";
   category: string;
   main_photo: string;
 }
 
 export interface Recipe extends RecipeSummary {
-  serves: string;
   ingredients: RecipeIngredientGroup[];
   instructions: RecipeInstruction[];
   tips_and_notes: string[];

@@ -5,9 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Clock,
   ChefHat,
-  Users,
   ArrowLeft,
   Lightbulb,
   X,
@@ -20,12 +18,6 @@ interface RecipeDetailContentProps {
   recipe: Recipe;
   relatedRecipes: RecipeSummary[];
 }
-
-const difficultyColors = {
-  Easy: "bg-green-100 text-green-800 border-green-200",
-  Medium: "bg-yellow-100 text-yellow-800 border-yellow-200",
-  Hard: "bg-red-100 text-red-800 border-red-200",
-};
 
 export default function RecipeDetailContent({
   recipe,
@@ -91,32 +83,9 @@ export default function RecipeDetailContent({
             <h1 className="font-heading text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--color-charcoal)] mb-4">
               {recipe.title}
             </h1>
-            <p className="text-lg text-[var(--color-charcoal-light)] max-w-2xl mx-auto mb-6">
+            <p className="text-lg text-[var(--color-charcoal-light)] max-w-2xl mx-auto">
               {recipe.summary}
             </p>
-
-            {/* Meta Info */}
-            <div className="flex flex-wrap items-center justify-center gap-4 md:gap-6">
-              <div className="flex items-center gap-2 text-[var(--color-charcoal-light)]">
-                <Clock className="w-5 h-5 text-[var(--color-primary)]" />
-                <span className="text-sm">
-                  <span className="font-medium">Prep Time:</span> {recipe.preparation_time}
-                </span>
-              </div>
-              <div className="flex items-center gap-2 text-[var(--color-charcoal-light)]">
-                <Users className="w-5 h-5 text-[var(--color-primary)]" />
-                <span className="text-sm">
-                  <span className="font-medium">Serves:</span> {recipe.serves}
-                </span>
-              </div>
-              <span
-                className={`px-3 py-1 rounded-full text-sm font-medium border ${
-                  difficultyColors[recipe.difficulty]
-                }`}
-              >
-                {recipe.difficulty}
-              </span>
-            </div>
           </motion.div>
         </div>
       </section>
@@ -355,14 +324,6 @@ export default function RecipeDetailContent({
                         <h3 className="font-heading text-lg font-bold text-[var(--color-charcoal)] mb-2 group-hover:text-[var(--color-primary)] transition-colors">
                           {relatedRecipe.title}
                         </h3>
-                        <div className="flex items-center justify-between text-sm">
-                          <span className="text-[var(--color-charcoal-light)]">
-                            {relatedRecipe.preparation_time}
-                          </span>
-                          <span className="text-[var(--color-charcoal-light)]">
-                            {relatedRecipe.difficulty}
-                          </span>
-                        </div>
                       </div>
                     </Link>
                   </motion.div>

@@ -109,9 +109,6 @@ export async function PUT(
     // Extract form data
     const title = formData.get('title') as string;
     const summary = formData.get('summary') as string;
-    const preparationTime = formData.get('preparation_time') as string;
-    const serves = formData.get('serves') as string;
-    const difficulty = formData.get('difficulty') as 'Easy' | 'Medium' | 'Hard';
     const category = formData.get('category') as string;
     const ingredientsJson = formData.get('ingredients') as string;
     const instructionsTextJson = formData.get('instructionsText') as string;
@@ -194,9 +191,6 @@ export async function PUT(
       slug: existingRecipe.slug, // Slug stays the same
       title,
       summary,
-      preparation_time: preparationTime,
-      serves,
-      difficulty,
       category,
       main_photo: mainPhotoUrl,
       ingredients,

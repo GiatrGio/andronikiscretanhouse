@@ -43,8 +43,6 @@ export async function getAllRecipes(): Promise<RecipeSummary[]> {
       slug: recipe.slug,
       title: recipe.title,
       summary: recipe.summary,
-      preparation_time: recipe.preparation_time,
-      difficulty: recipe.difficulty,
       category: recipe.category,
       main_photo: recipe.main_photo,
     };

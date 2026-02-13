@@ -41,9 +41,6 @@ export async function POST(request: NextRequest) {
     const title = formData.get('title') as string;
     const slug = formData.get('slug') as string;
     const summary = formData.get('summary') as string;
-    const preparation_time = formData.get('preparation_time') as string;
-    const serves = formData.get('serves') as string;
-    const difficulty = formData.get('difficulty') as string;
     const category = formData.get('category') as string;
 
     // First, insert the recipe to get the ID
@@ -54,9 +51,6 @@ export async function POST(request: NextRequest) {
           slug,
           title,
           summary,
-          preparation_time,
-          serves,
-          difficulty,
           category,
           main_photo: '',
           ingredients: [],
@@ -145,9 +139,6 @@ export async function POST(request: NextRequest) {
       slug,
       title,
       summary,
-      preparation_time,
-      serves,
-      difficulty,
       category,
       main_photo: mainPhotoUrl,
       ingredients,
