@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { X, Plus, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Recipe } from "@/lib/constants";
+import { compressImage } from "@/lib/imageCompression";
 
 interface AddRecipeModalProps {
   isOpen: boolean;
@@ -220,9 +221,10 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
       formData.append("summary", summary);
       formData.append("category", category);
 
-      // Add main photo
+      // Add main photo (compressed)
       if (mainPhoto) {
-        formData.append("mainPhoto", mainPhoto);
+        const compressedMain = await compressImage(mainPhoto);
+        formData.append("mainPhoto", compressedMain);
       }
 
       // Signal main photo removal in edit mode
@@ -245,17 +247,18 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
         text: inst.text
       }))));
 
-      // Add instruction photos
-      instructionsData.forEach((inst) => {
-        inst.photos.forEach((photo, photoIndex) => {
-          formData.append(`instruction_${inst.step}_photo_${photoIndex}`, photo);
-        });
+      // Add instruction photos (compressed)
+      for (const inst of instructionsData) {
+        for (let photoIndex = 0; photoIndex < inst.photos.length; photoIndex++) {
+          const compressed = await compressImage(inst.photos[photoIndex]);
+          formData.append(`instruction_${inst.step}_photo_${photoIndex}`, compressed);
+        }
         // Send existing step photos to keep
         if (editMode) {
           const kept = existingStepPhotos[inst.step] || [];
           formData.append(`existingStepPhotos_${inst.step}`, JSON.stringify(kept));
         }
-      });
+      }
 
       // Add tips
       formData.append("tips_and_notes", JSON.stringify(tips.filter(tip => tip.trim() !== "")));

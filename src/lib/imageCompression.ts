@@ -1,5 +1,5 @@
 const MAX_UPLOAD_SIZE = 25 * 1024 * 1024; // 25MB - reject above this
-const MAX_STORAGE_SIZE = 2 * 1024 * 1024;  // 2MB - compress to this
+const MAX_STORAGE_SIZE = 1 * 1024 * 1024;  // 1MB - compress to this (keeps Vercel payload under 4.5MB with multiple photos)
 
 export function needsCompression(file: File): boolean {
   return file.size > MAX_STORAGE_SIZE;
