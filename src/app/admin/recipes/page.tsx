@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { Plus, Pencil, Trash2, ExternalLink } from "lucide-react";
 import AdminHeader from "@/components/admin/AdminHeader";
 import TableCard from "@/components/admin/cards/TableCard";
 import AddRecipeModal from "@/components/admin/AddRecipeModal";
@@ -145,6 +145,11 @@ export default function RecipesDashboard() {
             columns={columns}
             data={recipeData}
             actions={[
+              {
+                icon: <ExternalLink className="w-4 h-4 text-gray-600" />,
+                onClick: (index: number) => window.open(`/recipes/${recipes[index].id}`, "_blank"),
+                title: "View recipe",
+              },
               {
                 icon: <Pencil className="w-4 h-4 text-blue-600" />,
                 onClick: handleEdit,

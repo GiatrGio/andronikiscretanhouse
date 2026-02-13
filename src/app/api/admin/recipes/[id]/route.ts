@@ -121,6 +121,7 @@ export async function PUT(
 
     // Handle main photo
     const mainPhotoFile = formData.get('mainPhoto') as File | null;
+    const removeMainPhoto = formData.get('removeMainPhoto') as string;
     let mainPhotoUrl = existingRecipe.main_photo;
 
     if (mainPhotoFile && mainPhotoFile.size > 0) {
@@ -133,6 +134,8 @@ export async function PUT(
       if (uploadedUrl) {
         mainPhotoUrl = uploadedUrl;
       }
+    } else if (removeMainPhoto === 'true') {
+      mainPhotoUrl = '';
     }
 
     // Process instructions with photos
@@ -157,11 +160,24 @@ export async function PUT(
         }
       }
 
+      // Keep existing photos that the client says to retain
+      const existingStepPhotosJson = formData.get(`existingStepPhotos_${inst.step}`) as string | null;
+      if (existingStepPhotosJson) {
+        const keptUrls: string[] = JSON.parse(existingStepPhotosJson);
+        for (const url of keptUrls) {
+          instructions.push({
+            step: inst.step,
+            type: 'photo',
+            value: url,
+          });
+        }
+      }
+
       // Upload new photos
       for (let i = 0; i < stepPhotos.length; i++) {
         const photoFile = stepPhotos[i];
         const photoBuffer = Buffer.from(await photoFile.arrayBuffer());
-        const photoPath = `${recipeId}/step${inst.step}-${i + 1}.jpg`;
+        const photoPath = `${recipeId}/step${inst.step}-new${Date.now()}-${i + 1}.jpg`;
         const photoUrl = await uploadImageFromBuffer(
           photoBuffer,
           photoPath,
@@ -175,14 +191,6 @@ export async function PUT(
             value: photoUrl,
           });
         }
-      }
-
-      // If no new photos, keep existing photos for this step
-      if (stepPhotos.length === 0) {
-        const existingPhotos = existingRecipe.instructions.filter(
-          (i) => i.step === inst.step && i.type === 'photo'
-        );
-        instructions.push(...existingPhotos);
       }
     }
 

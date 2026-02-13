@@ -48,6 +48,10 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
   // Tips
   const [tips, setTips] = useState<string[]>([""]);
 
+  // Existing photos (edit mode only)
+  const [existingMainPhoto, setExistingMainPhoto] = useState("");
+  const [existingStepPhotos, setExistingStepPhotos] = useState<Record<number, string[]>>({});
+
   // Auto-generate slug from title (only in create mode)
   const handleTitleChange = (value: string) => {
     setTitle(value);
@@ -171,6 +175,9 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
       }));
       setIngredientGroups(loadedGroups.length > 0 ? loadedGroups : [{ group: "", items: [""] }]);
 
+      // Populate existing main photo
+      setExistingMainPhoto(recipe.main_photo || "");
+
       // Populate instructions (only text, photos can't be pre-loaded as Files)
       const textInstructions = recipe.instructions.filter(inst => inst.type === "text");
       const loadedInstructions = textInstructions.map(inst => ({
@@ -179,6 +186,16 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
         photos: [],
       }));
       setInstructions(loadedInstructions.length > 0 ? loadedInstructions : [{ step: 1, text: "", photos: [] }]);
+
+      // Populate existing step photos
+      const stepPhotos: Record<number, string[]> = {};
+      recipe.instructions
+        .filter(inst => inst.type === "photo")
+        .forEach(inst => {
+          if (!stepPhotos[inst.step]) stepPhotos[inst.step] = [];
+          stepPhotos[inst.step].push(inst.value);
+        });
+      setExistingStepPhotos(stepPhotos);
 
       // Populate tips
       setTips(recipe.tips_and_notes.length > 0 ? recipe.tips_and_notes : [""]);
@@ -208,6 +225,11 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
         formData.append("mainPhoto", mainPhoto);
       }
 
+      // Signal main photo removal in edit mode
+      if (editMode && !existingMainPhoto && !mainPhoto) {
+        formData.append("removeMainPhoto", "true");
+      }
+
       // Add ingredients
       formData.append("ingredients", JSON.stringify(
         ingredientGroups.map(g => ({
@@ -228,6 +250,11 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
         inst.photos.forEach((photo, photoIndex) => {
           formData.append(`instruction_${inst.step}_photo_${photoIndex}`, photo);
         });
+        // Send existing step photos to keep
+        if (editMode) {
+          const kept = existingStepPhotos[inst.step] || [];
+          formData.append(`existingStepPhotos_${inst.step}`, JSON.stringify(kept));
+        }
       });
 
       // Add tips
@@ -264,6 +291,8 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
     setSummary("");
     setCategory("");
     setMainPhoto(null);
+    setExistingMainPhoto("");
+    setExistingStepPhotos({});
     setIngredientGroups([{ group: "", items: [""] }]);
     setInstructions([{ step: 1, text: "", photos: [] }]);
     setTips([""]);
@@ -377,6 +406,25 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                     onChange={(e) => setMainPhoto(e.target.files?.[0] || null)}
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
                   />
+                  {existingMainPhoto && !mainPhoto && (
+                    <div className="mt-2 flex items-center gap-3">
+                      <div className="relative group">
+                        <img
+                          src={existingMainPhoto}
+                          alt="Current main photo"
+                          className="w-20 h-20 object-cover rounded-lg border"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setExistingMainPhoto("")}
+                          className="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      </div>
+                      <span className="text-xs text-gray-500">Current photo</span>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -487,6 +535,31 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
 
                     <div>
                       <label className="block text-sm font-medium mb-2">Photos (optional)</label>
+                      {existingStepPhotos[instruction.step]?.length > 0 && (
+                        <div className="mb-2 flex flex-wrap gap-2">
+                          {existingStepPhotos[instruction.step].map((photoUrl, photoIndex) => (
+                            <div key={photoIndex} className="relative group">
+                              <img
+                                src={photoUrl}
+                                alt={`Step ${instruction.step} photo ${photoIndex + 1}`}
+                                className="w-20 h-20 object-cover rounded-lg border"
+                              />
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setExistingStepPhotos(prev => ({
+                                    ...prev,
+                                    [instruction.step]: prev[instruction.step].filter((_, i) => i !== photoIndex),
+                                  }));
+                                }}
+                                className="absolute -top-2 -right-2 p-1 bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                              >
+                                <X className="w-3 h-3" />
+                              </button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
                       <input
                         type="file"
                         accept="image/*"
@@ -515,6 +588,14 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                     </div>
                   </div>
                 ))}
+
+                <button
+                  type="button"
+                  onClick={addInstruction}
+                  className="text-sm text-[var(--color-primary)] hover:underline"
+                >
+                  + Add step
+                </button>
               </div>
 
               {/* Tips */}
@@ -550,6 +631,14 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                     </button>
                   </div>
                 ))}
+
+                <button
+                  type="button"
+                  onClick={addTip}
+                  className="text-sm text-[var(--color-primary)] hover:underline"
+                >
+                  + Add tip
+                </button>
               </div>
 
               {/* Actions */}
