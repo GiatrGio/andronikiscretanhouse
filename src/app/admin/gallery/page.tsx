@@ -31,6 +31,8 @@ const CATEGORY_OPTIONS = [
   "Our Dishes",
   "Happy Guests",
   "The Venue",
+  "Courses",
+  "About Us",
   "Other",
 ];
 

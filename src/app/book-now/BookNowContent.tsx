@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useForm, Controller, useWatch } from "react-hook-form";
 import { Clock, Send, Check, ExternalLink, AlertTriangle } from "lucide-react";
@@ -57,6 +57,13 @@ export default function BookNowContent() {
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [errorMessage, setErrorMessage] = useState("");
   const [bookingPreferences, setBookingPreferences] = useState<BookingPreferences | null>(null);
+  const successRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (status === "success" && successRef.current) {
+      successRef.current.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [status]);
 
   // Fetch booking preferences
   useEffect(() => {
@@ -253,6 +260,7 @@ export default function BookNowContent() {
 
             {status === "success" ? (
               <motion.div
+                ref={successRef}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 className="bg-green-50 border border-green-200 rounded-xl p-8 text-center"

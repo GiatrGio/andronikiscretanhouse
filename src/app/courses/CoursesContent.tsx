@@ -4,7 +4,6 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
-  ChefHat,
   Flame,
   Leaf,
   Clock,
@@ -79,38 +78,12 @@ const timelineTitles = [
   },
 ];
 
-const galleryImages = [
-  {
-    src: "/images/placeholder-courtyard.jpg",
-    alt: "Beautiful Cretan courtyard with traditional architecture",
-    caption: "Our Traditional Courtyard",
-  },
-  {
-    src: "/images/placeholder-cooking.jpg",
-    alt: "Hands-on cooking experience",
-    caption: "Hands-on Cooking",
-  },
-  {
-    src: "/images/placeholder-oven.jpg",
-    alt: "Traditional wood-fired oven",
-    caption: "Wood-Fired Oven",
-  },
-  {
-    src: "/images/placeholder-dishes.jpg",
-    alt: "Delicious Cretan dishes",
-    caption: "Our Creations",
-  },
-  {
-    src: "/images/placeholder-garden.jpg",
-    alt: "Organic herb garden",
-    caption: "The Garden",
-  },
-  {
-    src: "/images/placeholder-guests.jpg",
-    alt: "Happy guests enjoying the meal",
-    caption: "Happy Guests",
-  },
-];
+interface GalleryPhoto {
+  id: string;
+  title: string;
+  category: string;
+  image_url: string;
+}
 
 const keyDetails = [
   {
@@ -183,6 +156,7 @@ const goodToKnow = [
 
 export default function CoursesContent() {
   const [timeSlots, setTimeSlots] = useState<MonthlyTimeSlot[] | null>(null);
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
 
   useEffect(() => {
     const fetchPreferences = async () => {
@@ -197,6 +171,19 @@ export default function CoursesContent() {
       }
     };
     fetchPreferences();
+
+    const fetchGalleryPhotos = async () => {
+      try {
+        const response = await fetch("/api/gallery?category=Courses");
+        if (response.ok) {
+          const data = await response.json();
+          setGalleryPhotos(data.photos || []);
+        }
+      } catch (error) {
+        console.error("Error fetching gallery photos:", error);
+      }
+    };
+    fetchGalleryPhotos();
   }, []);
 
   const currentMonth = new Date().getMonth() + 1;
@@ -403,49 +390,55 @@ export default function CoursesContent() {
       </section>
 
       {/* Image Gallery Preview */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-4">
-              A Glimpse of the Experience
-            </h2>
-          </motion.div>
+      {galleryPhotos.length > 0 && (
+        <section className="py-16 md:py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-4">
+                A Glimpse of the Experience
+              </h2>
+            </motion.div>
 
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-            {galleryImages.map((image, index) => (
-              <motion.div
-                key={image.alt}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="relative aspect-square rounded-xl overflow-hidden bg-[var(--color-primary)]/10 group cursor-pointer"
-              >
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <ChefHat className="w-12 h-12 text-[var(--color-primary)]/30" />
-                </div>
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-center justify-center">
-                  <p className="text-white font-medium opacity-0 group-hover:opacity-100 transition-opacity">
-                    {image.caption}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {galleryPhotos.map((photo, index) => (
+                <motion.div
+                  key={photo.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="relative aspect-square rounded-xl overflow-hidden bg-[var(--color-primary)]/10 group"
+                >
+                  <Image
+                    src={photo.image_url}
+                    alt={photo.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-start p-4">
+                    <p className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      {photo.title}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
 
-          <div className="text-center mt-8">
-            <Button href="/gallery" variant="outline">
-              View Full Gallery
-            </Button>
+            <div className="text-center mt-8">
+              <Button href="/gallery" variant="outline">
+                View Full Gallery
+              </Button>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* Key Information */}
       <section className="py-16 md:py-24">

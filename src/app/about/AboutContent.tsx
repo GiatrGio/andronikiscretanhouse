@@ -1,9 +1,17 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import { Heart, Leaf, Users, Award } from "lucide-react";
 import Button from "@/components/ui/Button";
+
+interface GalleryPhoto {
+  id: string;
+  title: string;
+  category: string;
+  image_url: string;
+}
 
 const values = [
   {
@@ -33,6 +41,23 @@ const values = [
 ];
 
 export default function AboutContent() {
+  const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
+
+  useEffect(() => {
+    const fetchGalleryPhotos = async () => {
+      try {
+        const response = await fetch("/api/gallery?category=About Us");
+        if (response.ok) {
+          const data = await response.json();
+          setGalleryPhotos(data.photos || []);
+        }
+      } catch (error) {
+        console.error("Error fetching gallery photos:", error);
+      }
+    };
+    fetchGalleryPhotos();
+  }, []);
+
   return (
     <div className="bg-[var(--color-cream)]">
       {/* Our Story */}
@@ -182,6 +207,57 @@ export default function AboutContent() {
           </div>
         </div>
       </section>
+
+      {/* Gallery Preview */}
+      {galleryPhotos.length > 0 && (
+        <section className="py-16 md:py-24 bg-white">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ duration: 0.6 }}
+              className="text-center mb-12"
+            >
+              <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-4">
+                A Glimpse of Our Home
+              </h2>
+            </motion.div>
+
+            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+              {galleryPhotos.map((photo, index) => (
+                <motion.div
+                  key={photo.id}
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  className="relative aspect-square rounded-xl overflow-hidden bg-[var(--color-primary)]/10 group"
+                >
+                  <Image
+                    src={photo.image_url}
+                    alt={photo.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    sizes="(max-width: 768px) 50vw, 33vw"
+                  />
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors flex items-end justify-start p-4">
+                    <p className="text-white text-sm font-medium opacity-0 group-hover:opacity-100 transition-opacity">
+                      {photo.title}
+                    </p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            <div className="text-center mt-8">
+              <Button href="/gallery" variant="outline">
+                View Full Gallery
+              </Button>
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* CTA Section */}
       <section className="py-16 md:py-24 bg-[var(--color-primary)]">
