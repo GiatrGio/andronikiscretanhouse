@@ -3,13 +3,14 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useForm, Controller, useWatch } from "react-hook-form";
-import { Clock, Send, Check, ExternalLink, AlertTriangle } from "lucide-react";
+import { Clock, Send, Check, ExternalLink, AlertTriangle, Users } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Input, { Textarea, Select } from "@/components/ui/Input";
 import Button from "@/components/ui/Button";
 import { BOOKING_PARTNERS } from "@/lib/bookingPartners";
 import type { BookingPreferences, DateOverridePublic } from "@/lib/types/preferences";
+import { COURSE_DETAILS } from "@/lib/constants";
 import { getTimeSlotForMonth, formatTimeSlotRange, formatMonthRange, formatTime24to12 } from "@/lib/timeSlots";
 
 // Format date to YYYY-MM-DD using local timezone (not UTC)
@@ -454,8 +455,26 @@ export default function BookNowContent() {
                   />
                 </div>
 
-                {/* Guest count warning */}
-                {spotsWarning && (
+                {/* Private group message for large groups */}
+                {watchedGuests && (watchedGuests === "9+" || parseInt(watchedGuests, 10) >= COURSE_DETAILS.privateGroupMinGuests) && (
+                  <div className="flex items-start gap-3 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                    <Users className="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-800">
+                        Private course available for your group!
+                      </p>
+                      <p className="mt-1 text-sm text-blue-700">
+                        For groups of {COURSE_DETAILS.privateGroupMinGuests} or more, we offer a private cooking experience. We can also be more flexible with dates — including days that may appear unavailable in the calendar.
+                      </p>
+                      <p className="mt-1 text-sm text-blue-700">
+                        Send us a message and we&apos;ll arrange the perfect date for your group.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Limited availability warning (hidden for large groups) */}
+                {spotsWarning && watchedGuests && !(watchedGuests === "9+" || parseInt(watchedGuests, 10) >= COURSE_DETAILS.privateGroupMinGuests) && (
                   <div className="flex items-start gap-3 p-4 bg-amber-50 border border-amber-200 rounded-lg">
                     <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
                     <div>

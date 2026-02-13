@@ -25,6 +25,7 @@ export const COURSE_DETAILS = {
   season: "April 20th to October 9th",
   maxGroupSize: 8,
   maxPrivateGroupSize: 12,
+  privateGroupMinGuests: 7,
   bookingDeadline: "2 days before the event",
   duration: "Approximately 4 hours (including meal)",
   included: ["Written recipes", "Traditional souvenirs", "Full meal with wine"],
