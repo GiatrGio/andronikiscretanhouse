@@ -106,7 +106,7 @@ export default function RecipeDetailContent({
                   <span className="w-8 h-8 rounded-full bg-[var(--color-primary)]/10 flex items-center justify-center">
                     <ChefHat className="w-4 h-4 text-[var(--color-primary)]" />
                   </span>
-                  Ingredients
+                  What you will need
                 </h2>
 
                 {recipe.ingredients.map((group, groupIndex) => (
@@ -146,7 +146,7 @@ export default function RecipeDetailContent({
                       1
                     </span>
                   </span>
-                  Instructions
+                  The recipe step to step
                 </h2>
 
                 <ol className="space-y-6">
@@ -226,6 +226,14 @@ export default function RecipeDetailContent({
                       </li>
                     ));
                   })()}
+                  <li className="flex gap-4">
+                    <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-sm font-bold">
+                      <ChefHat className="w-4 h-4" />
+                    </span>
+                    <p className="font-heading text-lg md:text-xl text-[var(--color-primary)] italic pt-1">
+                      Bon Appetite - Kali orexi
+                    </p>
+                  </li>
                 </ol>
               </div>
 
@@ -258,35 +266,7 @@ export default function RecipeDetailContent({
               )}
             </motion.div>
           </div>
-        </div>
-      </section>
 
-      {/* CTA Section */}
-      <section className="py-12 md:py-16 bg-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.5 }}
-            className="bg-[var(--color-primary)] rounded-2xl p-8 md:p-12 text-center"
-          >
-            <h2 className="font-heading text-2xl md:text-3xl font-bold text-white mb-4">
-              Want to Learn This Recipe in Person?
-            </h2>
-            <p className="text-white/90 mb-6 max-w-xl mx-auto">
-              Join us for a cooking class and we'll teach you the authentic
-              techniques, share the stories behind the dishes, and enjoy the
-              meal together.
-            </p>
-            <Button
-              href="/book-now"
-              size="lg"
-              className="bg-white !text-[var(--color-primary)] hover:bg-white/90"
-            >
-              Book a Cooking Class
-            </Button>
-          </motion.div>
         </div>
       </section>
 
@@ -318,7 +298,21 @@ export default function RecipeDetailContent({
                       className="block bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
                     >
                       <div className="relative aspect-[4/3] bg-[var(--color-primary)]/10 flex items-center justify-center">
-                        <ChefHat className="w-12 h-12 text-[var(--color-primary)]/30 group-hover:scale-110 transition-transform" />
+                        {relatedRecipe.main_photo && !imageErrors.has(relatedRecipe.main_photo) ? (
+                          <Image
+                            src={relatedRecipe.main_photo}
+                            alt={relatedRecipe.title}
+                            fill
+                            className="object-cover group-hover:scale-105 transition-transform duration-300"
+                            sizes="(max-width: 768px) 100vw, 33vw"
+                            unoptimized
+                            onError={() => {
+                              setImageErrors(prev => new Set(prev).add(relatedRecipe.main_photo));
+                            }}
+                          />
+                        ) : (
+                          <ChefHat className="w-12 h-12 text-[var(--color-primary)]/30 group-hover:scale-110 transition-transform" />
+                        )}
                       </div>
                       <div className="p-5">
                         <h3 className="font-heading text-lg font-bold text-[var(--color-charcoal)] mb-2 group-hover:text-[var(--color-primary)] transition-colors">
