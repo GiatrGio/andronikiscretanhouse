@@ -63,7 +63,6 @@ export default function RecipeDetailContent({
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, 896px"
                 priority
-                unoptimized
                 onError={() => {
                   setImageErrors(prev => new Set(prev).add(recipe.main_photo));
                 }}
@@ -205,8 +204,7 @@ export default function RecipeDetailContent({
                                       fill
                                       className="object-cover"
                                       sizes="(max-width: 768px) 100vw, 50vw"
-                                      unoptimized
-                                      onError={() => {
+                                                            onError={() => {
                                         setImageErrors(prev => new Set(prev).add(photo));
                                       }}
                                     />
@@ -305,8 +303,7 @@ export default function RecipeDetailContent({
                             fill
                             className="object-cover group-hover:scale-105 transition-transform duration-300"
                             sizes="(max-width: 768px) 100vw, 33vw"
-                            unoptimized
-                            onError={() => {
+                                        onError={() => {
                               setImageErrors(prev => new Set(prev).add(relatedRecipe.main_photo));
                             }}
                           />
@@ -364,7 +361,6 @@ export default function RecipeDetailContent({
                 fill
                 className="object-contain rounded-lg"
                 sizes="90vw"
-                unoptimized
               />
             </motion.div>
           </motion.div>

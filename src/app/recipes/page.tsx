@@ -2,8 +2,8 @@ import { Metadata } from "next";
 import RecipesContent from "./RecipesContent";
 import { getAllRecipes } from "@/lib/recipes";
 
-// Use dynamic rendering since we're fetching from Supabase
-export const dynamic = 'force-dynamic';
+// Revalidate every hour - recipes don't change frequently
+export const revalidate = 3600;
 
 export const metadata: Metadata = {
   title: "Greek Traditional Recipes",

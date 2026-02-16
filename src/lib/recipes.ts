@@ -101,22 +101,3 @@ export async function getRelatedRecipes(
   return [...sameCategory, ...others].slice(0, limit);
 }
 
-// Get all recipe IDs for static generation
-export async function getAllRecipeIds(): Promise<number[]> {
-  if (!isSupabaseConfigured()) {
-    return [];
-  }
-
-  const supabase = getSupabaseClient();
-
-  const { data, error } = await supabase
-    .from('recipes')
-    .select('id');
-
-  if (error) {
-    console.error('Error fetching recipe IDs:', error);
-    return [];
-  }
-
-  return data.map((row) => row.id);
-}

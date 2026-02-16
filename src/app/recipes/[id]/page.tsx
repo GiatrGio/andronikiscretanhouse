@@ -3,7 +3,6 @@ import { notFound } from "next/navigation";
 import { getRecipeById, getRelatedRecipes } from "@/lib/recipes";
 import RecipeDetailContent from "./RecipeDetailContent";
 
-// Use dynamic rendering since we're fetching from Supabase
 export const dynamic = 'force-dynamic';
 
 interface Props {
