@@ -2,15 +2,10 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { TrendingUp, ChefHat, LogOut, Settings, MessageSquareQuote, ImagePlus } from "lucide-react";
+import { ChefHat, LogOut, Settings, MessageSquareQuote, ImagePlus } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 
 const menuItems = [
-  {
-    label: "Analytics Dashboard",
-    href: "/admin/analytics",
-    icon: TrendingUp,
-  },
   {
     label: "Recipes Dashboard",
     href: "/admin/recipes",
