@@ -39,14 +39,28 @@ export default function RecipeDetailContent({
             ]}
           />
 
-          {/* Back Button */}
-          <Link
-            href="/recipes"
-            className="inline-flex items-center gap-2 text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors mb-6"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            Back to Recipes
-          </Link>
+          {/* Back Button + Category Pills */}
+          <div className="flex items-center justify-between mb-6">
+            <Link
+              href="/recipes"
+              className="inline-flex items-center gap-2 text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to Recipes
+            </Link>
+            {recipe.categories && recipe.categories.length > 0 && (
+              <div className="flex flex-wrap gap-2 justify-end">
+                {recipe.categories.map((cat) => (
+                  <span
+                    key={cat}
+                    className="px-3 py-1 bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-sm font-medium rounded-full"
+                  >
+                    {cat}
+                  </span>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Recipe Image */}
           <motion.div

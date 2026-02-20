@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { X, Plus, Trash2 } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
+import { X, Plus, Trash2, ChevronDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Recipe } from "@/lib/constants";
 import { compressImage } from "@/lib/imageCompression";
@@ -31,10 +31,15 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
 
   // Basic fields
   const [title, setTitle] = useState("");
-  const [slug, setSlug] = useState("");
   const [summary, setSummary] = useState("");
-  const [category, setCategory] = useState("");
+  const [categories, setCategories] = useState<string[]>([]);
   const [mainPhoto, setMainPhoto] = useState<File | null>(null);
+
+  // Category dropdown
+  const [existingCategories, setExistingCategories] = useState<string[]>([]);
+  const [isCategoryDropdownOpen, setIsCategoryDropdownOpen] = useState(false);
+  const [newCategoryInput, setNewCategoryInput] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Ingredients
   const [ingredientGroups, setIngredientGroups] = useState<IngredientGroup[]>([
@@ -53,18 +58,52 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
   const [existingMainPhoto, setExistingMainPhoto] = useState("");
   const [existingStepPhotos, setExistingStepPhotos] = useState<Record<number, string[]>>({});
 
-  // Auto-generate slug from title (only in create mode)
-  const handleTitleChange = (value: string) => {
-    setTitle(value);
-    if (!editMode) {
-      const generatedSlug = value
-        .toLowerCase()
-        .replace(/[^a-z0-9\s-]/g, "")
-        .replace(/\s+/g, "-")
-        .replace(/-+/g, "-")
-        .trim();
-      setSlug(generatedSlug);
+  // Fetch existing categories from recipes
+  useEffect(() => {
+    if (isOpen) {
+      fetch('/api/admin/recipes')
+        .then(res => res.json())
+        .then(data => {
+          const allCats = new Set<string>();
+          (data.recipes || []).forEach((r: { categories?: string[] }) => {
+            (r.categories || []).forEach((c: string) => allCats.add(c));
+          });
+          setExistingCategories(Array.from(allCats).sort());
+        })
+        .catch(() => {});
     }
+  }, [isOpen]);
+
+  // Close dropdown on outside click
+  useEffect(() => {
+    function handleClick(e: MouseEvent) {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
+        setIsCategoryDropdownOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, []);
+
+  const toggleCategory = (cat: string) => {
+    setCategories(prev =>
+      prev.includes(cat) ? prev.filter(c => c !== cat) : [...prev, cat]
+    );
+  };
+
+  const addNewCategory = () => {
+    const trimmed = newCategoryInput.trim();
+    if (trimmed && !categories.includes(trimmed)) {
+      setCategories(prev => [...prev, trimmed]);
+      if (!existingCategories.includes(trimmed)) {
+        setExistingCategories(prev => [...prev, trimmed].sort());
+      }
+    }
+    setNewCategoryInput("");
+  };
+
+  const removeCategory = (cat: string) => {
+    setCategories(prev => prev.filter(c => c !== cat));
   };
 
   // Ingredient handlers
@@ -165,9 +204,8 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
 
       // Populate form with existing data
       setTitle(recipe.title);
-      setSlug(recipe.slug);
       setSummary(recipe.summary);
-      setCategory(recipe.category);
+      setCategories(recipe.categories || []);
 
       // Populate ingredients
       const loadedGroups = recipe.ingredients.map(group => ({
@@ -217,9 +255,8 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
 
       // Add basic fields
       formData.append("title", title);
-      formData.append("slug", slug);
       formData.append("summary", summary);
-      formData.append("category", category);
+      formData.append("categories", JSON.stringify(categories));
 
       // Add main photo (compressed)
       if (mainPhoto) {
@@ -290,15 +327,15 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
 
   const resetForm = () => {
     setTitle("");
-    setSlug("");
     setSummary("");
-    setCategory("");
+    setCategories([]);
     setMainPhoto(null);
     setExistingMainPhoto("");
     setExistingStepPhotos({});
     setIngredientGroups([{ group: "", items: [""] }]);
     setInstructions([{ step: 1, text: "", photos: [] }]);
     setTips([""]);
+    setNewCategoryInput("");
   };
 
   if (!isOpen) return null;
@@ -352,30 +389,15 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                   Basic Information
                 </h3>
 
-                <div className="grid md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Title *</label>
-                    <input
-                      type="text"
-                      value={title}
-                      onChange={(e) => handleTitleChange(e.target.value)}
-                      required
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-medium mb-1">Slug *</label>
-                    <input
-                      type="text"
-                      value={slug}
-                      onChange={(e) => setSlug(e.target.value)}
-                      required
-                      disabled={editMode}
-                      className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent disabled:bg-gray-100 disabled:cursor-not-allowed"
-                      title={editMode ? "Slug cannot be changed when editing" : ""}
-                    />
-                  </div>
+                <div>
+                  <label className="block text-sm font-medium mb-1">Title *</label>
+                  <input
+                    type="text"
+                    value={title}
+                    onChange={(e) => setTitle(e.target.value)}
+                    required
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                  />
                 </div>
 
                 <div>
@@ -389,16 +411,89 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                   />
                 </div>
 
-                <div>
-                  <label className="block text-sm font-medium mb-1">Category *</label>
-                  <input
-                    type="text"
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    placeholder="e.g., Main Courses"
-                    required
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
-                  />
+                {/* Categories multi-select dropdown */}
+                <div ref={dropdownRef}>
+                  <label className="block text-sm font-medium mb-1">Categories *</label>
+
+                  {/* Selected categories as pills */}
+                  {categories.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mb-2">
+                      {categories.map(cat => (
+                        <span
+                          key={cat}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-[var(--color-primary)]/10 text-[var(--color-primary)] rounded-full text-sm"
+                        >
+                          {cat}
+                          <button
+                            type="button"
+                            onClick={() => removeCategory(cat)}
+                            className="hover:text-red-600 transition-colors"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Dropdown trigger */}
+                  <button
+                    type="button"
+                    onClick={() => setIsCategoryDropdownOpen(!isCategoryDropdownOpen)}
+                    className="w-full px-3 py-2 border rounded-lg flex items-center justify-between text-left focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                  >
+                    <span className="text-gray-500">
+                      {categories.length === 0 ? "Select categories..." : "Add more categories..."}
+                    </span>
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isCategoryDropdownOpen ? "rotate-180" : ""}`} />
+                  </button>
+
+                  {/* Dropdown menu */}
+                  {isCategoryDropdownOpen && (
+                    <div className="mt-1 border rounded-lg bg-white shadow-lg max-h-60 overflow-y-auto z-20 relative">
+                      {existingCategories.map(cat => (
+                        <label
+                          key={cat}
+                          className="flex items-center gap-3 px-3 py-2 hover:bg-gray-50 cursor-pointer"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={categories.includes(cat)}
+                            onChange={() => toggleCategory(cat)}
+                            className="rounded border-gray-300 text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
+                          />
+                          <span className="text-sm">{cat}</span>
+                        </label>
+                      ))}
+
+                      {/* Add new category */}
+                      <div className="border-t px-3 py-2">
+                        <div className="flex items-center gap-2">
+                          <input
+                            type="text"
+                            value={newCategoryInput}
+                            onChange={(e) => setNewCategoryInput(e.target.value)}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.preventDefault();
+                                addNewCategory();
+                              }
+                            }}
+                            placeholder="Add new category..."
+                            className="flex-1 px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                          />
+                          <button
+                            type="button"
+                            onClick={addNewCategory}
+                            disabled={!newCategoryInput.trim()}
+                            className="px-2 py-1 text-sm bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-primary-dark)] disabled:opacity-50 transition-colors"
+                          >
+                            Add
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
@@ -656,7 +751,7 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || categories.length === 0}
                   className="flex-1 px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting

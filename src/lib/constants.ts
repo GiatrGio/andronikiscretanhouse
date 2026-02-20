@@ -45,10 +45,9 @@ export interface RecipeIngredientGroup {
 
 export interface RecipeSummary {
   id: number;
-  slug: string;
   title: string;
   summary: string;
-  category: string;
+  categories: string[];
   main_photo: string;
 }
 

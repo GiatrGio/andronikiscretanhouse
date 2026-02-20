@@ -1,21 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { ChefHat, Filter } from "lucide-react";
 import { RecipeSummary } from "@/lib/constants";
 import Button from "@/components/ui/Button";
-
-const categories = [
-  "All",
-  "Appetizers",
-  "Main Courses",
-  "Breads",
-  "Preserves",
-  "Desserts",
-];
 
 interface RecipesContentProps {
   recipes: RecipeSummary[];
@@ -24,10 +15,16 @@ interface RecipesContentProps {
 export default function RecipesContent({ recipes }: RecipesContentProps) {
   const [selectedCategory, setSelectedCategory] = useState("All");
 
+  const categories = useMemo(() => {
+    const cats = new Set<string>();
+    recipes.forEach((r) => r.categories.forEach((c) => cats.add(c)));
+    return ["All", ...Array.from(cats).sort()];
+  }, [recipes]);
+
   const filteredRecipes =
     selectedCategory === "All"
       ? recipes
-      : recipes.filter((recipe) => recipe.category === selectedCategory);
+      : recipes.filter((recipe) => recipe.categories.includes(selectedCategory));
 
   return (
     <div className="bg-[var(--color-cream)]">

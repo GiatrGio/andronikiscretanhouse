@@ -81,7 +81,7 @@ export async function DELETE(
   }
 }
 
-// PATCH - Toggle published status
+// PATCH - Toggle published status or update sort_order
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -91,22 +91,30 @@ export async function PATCH(
     const recipeId = Number(id);
     const supabase = createAdminClient();
 
-    const { published } = await request.json();
+    const body = await request.json();
+    const updates: Record<string, unknown> = {};
+
+    if ('published' in body) {
+      updates.published = body.published;
+    }
+    if ('sort_order' in body) {
+      updates.sort_order = body.sort_order;
+    }
 
     const { error } = await supabase
       .from('recipes')
-      .update({ published })
+      .update(updates)
       .eq('id', recipeId);
 
     if (error) {
       throw error;
     }
 
-    return NextResponse.json({ success: true, published });
+    return NextResponse.json({ success: true, ...updates });
   } catch (error) {
-    console.error('Error updating published status:', error);
+    console.error('Error updating recipe:', error);
     return NextResponse.json(
-      { error: 'Failed to update published status' },
+      { error: 'Failed to update recipe' },
       { status: 500 }
     );
   }
@@ -140,7 +148,8 @@ export async function PUT(
     // Extract form data
     const title = formData.get('title') as string;
     const summary = formData.get('summary') as string;
-    const category = formData.get('category') as string;
+    const categoriesJson = formData.get('categories') as string;
+    const categories: string[] = JSON.parse(categoriesJson);
     const ingredientsJson = formData.get('ingredients') as string;
     const instructionsTextJson = formData.get('instructionsText') as string;
     const tipsJson = formData.get('tips_and_notes') as string;
@@ -227,10 +236,9 @@ export async function PUT(
 
     // Build updated recipe data
     const updatedRecipeData = {
-      slug: existingRecipe.slug, // Slug stays the same
       title,
       summary,
-      category,
+      categories,
       main_photo: mainPhotoUrl,
       ingredients,
       instructions,

@@ -218,25 +218,27 @@ export default function CoursesContent() {
               transition={{ duration: 0.6 }}
             >
               <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-6">
-                More Than a Cooking Class
+                Cook with us, eat like a local
               </h2>
               <div className="space-y-4 text-[var(--color-charcoal-light)] text-lg leading-relaxed">
                 <p>
-                  In the flowered courtyard of our traditional Cretan home in
-                  Loutra, Rethymno, we invite you to experience the true essence
-                  of Greek hospitality and cuisine.
+                  Step into the flowered courtyard of our traditional Cretan home and let us take you on a
+                  journey through our family’s heritage.
+                  Using our old wood-fired oven—the true heart of Cretan kitchens for centuries—we’ll cook
+                  together just like our grandmothers used to.
                 </p>
                 <p>
-                  This is not just a cooking class—it's a journey into our
-                  family's heritage. Using a wood-fired oven that has been the
-                  heart of Cretan kitchens for centuries, we'll prepare dishes
-                  exactly as our grandmothers did.
+                  Our recipes are the same ones we enjoy every day: simple, authentic, and always centered
+                  around &#39;Cretan gold&#39; (our olive oil) and seasonal veggies.
                 </p>
                 <p>
-                  Every ingredient tells a story: herbs from our garden,
-                  olive oil from local groves, and vegetables ripened under
-                  the Cretan sun. Together, we'll create a meal that captures
-                  the soul of our island.
+                  A Note for our Green Friends: Cretan cuisine is almost vegetarian! This makes our kitchen a
+                  welcoming place for everyone—whether you are vegetarian, vegan, or just a lover of fresh greens.
+                  We focus on what the earth gives us, so no one ever leaves our table hungry.
+                </p>
+                <p>
+                  And finally, the best part: We’ll sit around the big wooden table to enjoy our meal together,
+                  sharing stories and a glass of local wine.
                 </p>
               </div>
             </motion.div>
@@ -248,50 +250,6 @@ export default function CoursesContent() {
             >
               <CourseImageCarousel />
             </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* What You'll Learn */}
-      <section className="py-16 md:py-24 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
-            className="text-center mb-12"
-          >
-            <h2 className="font-heading text-3xl md:text-4xl font-bold text-[var(--color-charcoal)] mb-4">
-              What You'll Learn
-            </h2>
-            <p className="text-lg text-[var(--color-charcoal-light)] max-w-2xl mx-auto">
-              Our hands-on classes cover everything from ingredient selection
-              to plating, giving you skills to recreate these dishes at home
-            </p>
-          </motion.div>
-
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-            {whatYouLearn.map((item, index) => (
-              <motion.div
-                key={item.title}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className="bg-[var(--color-cream)] rounded-xl p-6 text-center"
-              >
-                <div className="w-14 h-14 rounded-full bg-[var(--color-secondary)]/10 flex items-center justify-center mx-auto mb-4">
-                  <item.icon className="w-7 h-7 text-[var(--color-secondary)]" />
-                </div>
-                <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
-                  {item.title}
-                </h3>
-                <p className="text-[var(--color-charcoal-light)]">
-                  {item.description}
-                </p>
-              </motion.div>
-            ))}
           </div>
         </div>
       </section>

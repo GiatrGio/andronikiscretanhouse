@@ -28,9 +28,9 @@ export async function getAllRecipes(): Promise<RecipeSummary[]> {
 
   const { data, error } = await supabase
     .from('recipes')
-    .select('id, data')
+    .select('id, data, sort_order')
     .eq('published', true)
-    .order('id', { ascending: true });
+    .order('sort_order', { ascending: true });
 
   if (error) {
     console.error('Error fetching recipes:', error);
@@ -41,10 +41,9 @@ export async function getAllRecipes(): Promise<RecipeSummary[]> {
     const recipe = row.data as Recipe;
     return {
       id: row.id,
-      slug: recipe.slug,
       title: recipe.title,
       summary: recipe.summary,
-      category: recipe.category,
+      categories: recipe.categories || [],
       main_photo: recipe.main_photo,
     };
   });
@@ -88,16 +87,19 @@ export async function getRelatedRecipes(
 
   if (!currentRecipe) return [];
 
-  // Get recipes from the same category, excluding the current one
+  // Get recipes that share at least one category
   const sameCategory = allRecipes.filter(
-    (recipe) => recipe.category === currentRecipe.category && recipe.id !== currentId
+    (recipe) =>
+      recipe.id !== currentId &&
+      recipe.categories.some((c) => currentRecipe.categories.includes(c))
   );
 
-  // If not enough from same category, add others
+  // Others with no overlapping categories
   const others = allRecipes.filter(
-    (recipe) => recipe.category !== currentRecipe.category && recipe.id !== currentId
+    (recipe) =>
+      recipe.id !== currentId &&
+      !recipe.categories.some((c) => currentRecipe.categories.includes(c))
   );
 
   return [...sameCategory, ...others].slice(0, limit);
 }
-

@@ -8,8 +8,8 @@ export async function GET() {
 
     const { data, error } = await supabase
       .from('recipes')
-      .select('id, data, published, created_at, updated_at')
-      .order('id', { ascending: true });
+      .select('id, data, published, sort_order, created_at, updated_at')
+      .order('sort_order', { ascending: true });
 
     if (error) {
       throw error;
@@ -19,6 +19,7 @@ export async function GET() {
       id: row.id,
       ...row.data,
       published: row.published,
+      sort_order: row.sort_order,
       created_at: row.created_at,
       updated_at: row.updated_at,
     }));
@@ -40,24 +41,34 @@ export async function POST(request: NextRequest) {
 
     // Extract basic fields
     const title = formData.get('title') as string;
-    const slug = formData.get('slug') as string;
     const summary = formData.get('summary') as string;
-    const category = formData.get('category') as string;
+    const categoriesJson = formData.get('categories') as string;
+    const categories: string[] = JSON.parse(categoriesJson);
+
+    // Get max sort_order for new recipe
+    const { data: maxRow } = await supabase
+      .from('recipes')
+      .select('sort_order')
+      .order('sort_order', { ascending: false })
+      .limit(1)
+      .single();
+
+    const nextSortOrder = (maxRow?.sort_order ?? 0) + 1;
 
     // First, insert the recipe to get the ID
     const { data: insertedRecipe, error: insertError } = await supabase
       .from('recipes')
       .insert({
         data: {
-          slug,
           title,
           summary,
-          category,
+          categories,
           main_photo: '',
           ingredients: [],
           instructions: [],
           tips_and_notes: [],
         },
+        sort_order: nextSortOrder,
       })
       .select('id')
       .single();
@@ -137,10 +148,9 @@ export async function POST(request: NextRequest) {
 
     // Create recipe data object
     const recipeData = {
-      slug,
       title,
       summary,
-      category,
+      categories,
       main_photo: mainPhotoUrl,
       ingredients,
       instructions,
