@@ -59,6 +59,7 @@ export default function BookNowContent() {
   const [errorMessage, setErrorMessage] = useState("");
   const [bookingPreferences, setBookingPreferences] = useState<BookingPreferences | null>(null);
   const successRef = useRef<HTMLDivElement>(null);
+  const [showGroupHint, setShowGroupHint] = useState(false);
 
   useEffect(() => {
     if (status === "success" && successRef.current) {
@@ -438,6 +439,42 @@ export default function BookNowContent() {
                     <p className="mt-1 text-sm text-gray-500">
                       Click dates in the calendar to add/remove them
                     </p>
+
+                    {/* Group hint - always visible near the calendar */}
+                    <div className="mt-3 rounded-lg border border-blue-200 bg-blue-50/60 overflow-hidden">
+                      <button
+                        type="button"
+                        onClick={() => setShowGroupHint(!showGroupHint)}
+                        className="w-full flex items-center gap-2 px-3 py-2 text-left"
+                      >
+                        <Users className="w-4 h-4 text-blue-600 flex-shrink-0" />
+                        <span className="text-sm text-blue-800">
+                          <span className="font-medium">Group of {COURSE_DETAILS.privateGroupMinGuests}+?</span>{" "}
+                          We can open extra dates for you
+                        </span>
+                        <svg
+                          className={`w-4 h-4 text-blue-500 flex-shrink-0 ml-auto transition-transform ${showGroupHint ? "rotate-180" : ""}`}
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                        </svg>
+                      </button>
+                      {showGroupHint && (
+                        <div className="px-3 pb-3 pt-0 text-sm text-blue-700 border-t border-blue-200/60">
+                          <p className="mt-2 font-medium text-blue-800">
+                            Private course available for your group!
+                          </p>
+                          <p className="mt-1">
+                            For groups of {COURSE_DETAILS.privateGroupMinGuests} or more, we offer a private cooking experience. We can also be more flexible with dates — including days that may appear unavailable in the calendar.
+                          </p>
+                          <p className="mt-1">
+                            Send us a message and we&apos;ll arrange the perfect date for your group.
+                          </p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 
