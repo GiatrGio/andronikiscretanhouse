@@ -43,24 +43,48 @@ function formatSeasonFromPreferences(prefs: Preferences): string {
 
 const timelineTitles = [
   {
-    title: "Welcome & Garden Tour",
+    title: "Welcome",
     description:
-      "Meet your hosts, enjoy a welcome drink, and tour our organic garden where we'll pick fresh ingredients for our meal.",
+      "Your journey begins as if you’re visiting old friends. We welcome you with refreshing homemade lemonade or aromatic " +
+        "Cretan herbal tea, paired with our hand-folded kallitsounia—traditional pies made with our own artisan cheese and local honey.\n" +
+        "To help you feel at home, we’ll guide you through our space—a house filled with vintage treasures and local history. " +
+        "It’s the perfect time to chat, exchange stories, and embrace the slow pace of Cretan life before our culinary " +
+        "adventure begins.\n",
   },
   {
     title: "Cooking Begins",
     description:
-      "Roll up your sleeves! We'll prepare 4-5 traditional dishes together, learning techniques and stories behind each recipe.",
+      "Roll up your sleeves! We'll prepare 5 traditional dishes together, learning techniques and stories behind each recipe.\n" +
+      "•  homemade cheese with fresh sheep milk\n" +
+      "•  tzatziki (famous Greek salad or dip)\n" +
+      "•  moussaka or chaniotiko boureki (for our vegeterian quest)\n" +
+      "•  gemista (vine leaves, zucchini flowers, tomatoes, zucchini, and pepper stuffed)\n" +
+      "•  gouvarlakia avgolemono (meatballs with the famous egg-lemon sause)\n" +
+      "As we cook, we keep our energy up by tasting traditional \"treats\" straight from the kitchen: herb pies, onion pies, crispy fried potato skins.",
   },
   {
-    title: "Wood Oven Magic",
+    title: "Visit our botanical garden",
     description:
-      "Watch as dishes are baked in our traditional wood-fired oven, the heart of Cretan cooking.",
+      "We’ll take a stroll together through our gardens, where you can crush a leaf of wild oregano between your fingers " +
+        "or discover the unique scent of Cretan dittany. You’ll get to know the herbs that give our food its soul.\n",
   },
   {
     title: "Dinner Together",
     description:
-      "Sit down to enjoy the fruits of your labor with local wine, conversation, and Cretan hospitality.",
+      "The meal includes the dishes we prepare and some more:\n" +
+      "Appetizer\n" +
+      "•  homemade cheese\n" +
+      "•  daco (Cretan salad)\n" +
+      "•  tzatziki\n" +
+      "•  Greek salad\n" +
+      "Main dishes\n" +
+      "•  moussaka or Chaniotiko boureki\n" +
+      "•  gemista\n" +
+      "•  gigantes beans\n" +
+      "•  gouvarlakia avgolemono\n" +
+      "Dessert\n" +
+      "•  Greek strained yogurt with traditional spoon sweet\n" +
+      "Included: local wine, raki and homemade liqueur."
   },
   {
     title: "Farewell",
@@ -81,7 +105,7 @@ const included = [
     icon: UtensilsCrossed,
     title: "Full Meal & Wine",
     description:
-      "Enjoy everything you cook plus local wine and traditional raki",
+      "Enjoy everything you cook, some already prepared, plus local wine and traditional raki",
   },
   {
     icon: Gift,
@@ -93,7 +117,7 @@ const included = [
     icon: Gift,
     title: "Souvenirs",
     description:
-      "Traditional Cretan gifts to remember your experience",
+      "Gift from our garden to remember your experience",
   },
 ];
 
@@ -114,7 +138,7 @@ const goodToKnow = [
     icon: Car,
     title: "Getting Here",
     description:
-      "We're located in Loutra, Rethymno. Taxi or rental car recommended",
+      "While most guests arrive via taxi or rental car, the area is also served by public bus.",
   },
 ];
 
@@ -304,7 +328,7 @@ export default function CoursesContent() {
                         <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
                           {item.title}
                         </h3>
-                        <p className="text-[var(--color-charcoal-light)]">
+                        <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">
                           {item.description}
                         </p>
                       </div>
@@ -336,7 +360,7 @@ export default function CoursesContent() {
                         <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
                           {item.title}
                         </h3>
-                        <p className="text-[var(--color-charcoal-light)]">
+                        <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">
                           {item.description}
                         </p>
                       </div>
@@ -364,7 +388,7 @@ export default function CoursesContent() {
                     <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
                       {item.title}
                     </h3>
-                    <p className="text-[var(--color-charcoal-light)]">
+                    <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">
                       {item.description}
                     </p>
                   </div>
