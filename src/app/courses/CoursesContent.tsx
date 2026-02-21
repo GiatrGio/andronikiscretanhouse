@@ -4,11 +4,8 @@ import { useState, useEffect, useMemo } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
-  Flame,
-  Leaf,
   Clock,
   Users,
-  Heart,
   UtensilsCrossed,
   Calendar,
   CalendarCheck,
@@ -20,35 +17,29 @@ import {
 import Button from "@/components/ui/Button";
 import CourseImageCarousel from "@/components/CourseImageCarousel";
 import { COURSE_DETAILS } from "@/lib/constants";
-import type { MonthlyTimeSlot } from "@/lib/types/preferences";
-import { DEFAULT_TIME_SLOTS, getTimeSlotForMonth, generateTimeline } from "@/lib/timeSlots";
+import type { MonthlyTimeSlot, Preferences } from "@/lib/types/preferences";
+import { DEFAULT_TIME_SLOTS, generateTimeline, formatMonthRange } from "@/lib/timeSlots";
 
-const whatYouLearn = [
-  {
-    icon: UtensilsCrossed,
-    title: "Traditional Dishes",
-    description:
-      "Moussaka, dakos salad, stuffed vegetables, and traditional Cretan specialties",
-  },
-  {
-    icon: Flame,
-    title: "Wood Oven Cooking",
-    description:
-      "Master the art of cooking with a traditional wood-fired oven",
-  },
-  {
-    icon: Leaf,
-    title: "Fresh Ingredients",
-    description:
-      "Use herbs and vegetables straight from our organic garden",
-  },
-  {
-    icon: Heart,
-    title: "Family Secrets",
-    description:
-      "Learn recipes passed down through generations of Cretan families",
-  },
+const MONTH_NAMES = [
+  "", "January", "February", "March", "April", "May", "June",
+  "July", "August", "September", "October", "November", "December",
 ];
+
+function formatDayOrdinal(day: number): string {
+  if (day >= 11 && day <= 13) return `${day}th`;
+  switch (day % 10) {
+    case 1: return `${day}st`;
+    case 2: return `${day}nd`;
+    case 3: return `${day}rd`;
+    default: return `${day}th`;
+  }
+}
+
+function formatSeasonFromPreferences(prefs: Preferences): string {
+  const start = `${MONTH_NAMES[prefs.season_start_month]} ${formatDayOrdinal(prefs.season_start_day)}`;
+  const end = `${MONTH_NAMES[prefs.season_end_month]} ${formatDayOrdinal(prefs.season_end_day)}`;
+  return `${start} to ${end}`;
+}
 
 const timelineTitles = [
   {
@@ -84,33 +75,6 @@ interface GalleryPhoto {
   category: string;
   image_url: string;
 }
-
-const keyDetails = [
-  {
-    icon: Calendar,
-    title: "Season",
-    value: COURSE_DETAILS.season,
-    description: "Classes run during the warm Cretan summer and early autumn",
-  },
-  {
-    icon: Users,
-    title: "Group Size",
-    value: `Max ${COURSE_DETAILS.maxGroupSize} people`,
-    description: `Mixed groups up to ${COURSE_DETAILS.maxGroupSize}, private groups (family/friends) up to ${COURSE_DETAILS.maxPrivateGroupSize}`,
-  },
-  {
-    icon: Clock,
-    title: "Duration",
-    value: COURSE_DETAILS.duration,
-    description: "Including hands-on cooking and a full meal with wine",
-  },
-  {
-    icon: CalendarCheck,
-    title: "Booking Deadline",
-    value: COURSE_DETAILS.bookingDeadline,
-    description: "Please book at least 2 days in advance",
-  },
-];
 
 const included = [
   {
@@ -156,6 +120,7 @@ const goodToKnow = [
 
 export default function CoursesContent() {
   const [timeSlots, setTimeSlots] = useState<MonthlyTimeSlot[] | null>(null);
+  const [preferences, setPreferences] = useState<Preferences | null>(null);
   const [galleryPhotos, setGalleryPhotos] = useState<GalleryPhoto[]>([]);
 
   useEffect(() => {
@@ -164,6 +129,7 @@ export default function CoursesContent() {
         const response = await fetch("/api/preferences");
         if (response.ok) {
           const data = await response.json();
+          setPreferences(data.preferences);
           setTimeSlots(data.preferences.monthly_time_slots ?? DEFAULT_TIME_SLOTS);
         }
       } catch (error) {
@@ -186,25 +152,53 @@ export default function CoursesContent() {
     fetchGalleryPhotos();
   }, []);
 
-  const currentMonth = new Date().getMonth() + 1;
-
-  const timeline = useMemo(() => {
+  // Generate timelines for ALL season slots
+  const allTimelines = useMemo(() => {
     const slots = timeSlots ?? DEFAULT_TIME_SLOTS;
-    const activeSlot = getTimeSlotForMonth(slots, currentMonth);
-    const startTime = activeSlot?.start_time ?? "17:30";
-    const computed = generateTimeline(startTime);
-
-    return computed.map((item, i) => ({
-      time: item.time,
-      ...timelineTitles[i],
+    return slots.map((slot) => ({
+      label: slot.label,
+      months: formatMonthRange(slot.months),
+      items: generateTimeline(slot.start_time).map((item, i) => ({
+        time: item.time,
+        ...timelineTitles[i],
+      })),
     }));
-  }, [timeSlots, currentMonth]);
+  }, [timeSlots]);
 
-  const activeSlotLabel = useMemo(() => {
-    if (!timeSlots || timeSlots.length <= 1) return null;
-    const slot = getTimeSlotForMonth(timeSlots, currentMonth);
-    return slot?.label ?? null;
-  }, [timeSlots, currentMonth]);
+  const hasMultipleSlots = allTimelines.length > 1;
+
+  // Dynamic season string from preferences
+  const seasonValue = useMemo(() => {
+    if (preferences) return formatSeasonFromPreferences(preferences);
+    return COURSE_DETAILS.season;
+  }, [preferences]);
+
+  const keyDetails = useMemo(() => [
+    {
+      icon: Calendar,
+      title: "Season",
+      value: seasonValue,
+      description: "Classes run during the warm Cretan summer and early autumn",
+    },
+    {
+      icon: Users,
+      title: "Group Size",
+      value: `Max ${COURSE_DETAILS.maxGroupSize} people`,
+      description: `Mixed groups up to ${COURSE_DETAILS.maxGroupSize}, private groups (family/friends) up to ${COURSE_DETAILS.maxPrivateGroupSize}`,
+    },
+    {
+      icon: Clock,
+      title: "Duration",
+      value: COURSE_DETAILS.duration,
+      description: "Including hands-on cooking and a full meal with wine",
+    },
+    {
+      icon: CalendarCheck,
+      title: "Booking Deadline",
+      value: COURSE_DETAILS.bookingDeadline,
+      description: "Please book at least 2 days in advance",
+    },
+  ], [seasonValue]);
 
   return (
     <div className="bg-[var(--color-cream)]">
@@ -223,8 +217,8 @@ export default function CoursesContent() {
               <div className="space-y-4 text-[var(--color-charcoal-light)] text-lg leading-relaxed">
                 <p>
                   Step into the flowered courtyard of our traditional Cretan home and let us take you on a
-                  journey through our family’s heritage.
-                  Using our old wood-fired oven—the true heart of Cretan kitchens for centuries—we’ll cook
+                  journey through our family's heritage.
+                  Using our old wood-fired oven—the true heart of Cretan kitchens for centuries—we'll cook
                   together just like our grandmothers used to.
                 </p>
                 <p>
@@ -237,7 +231,7 @@ export default function CoursesContent() {
                   We focus on what the earth gives us, so no one ever leaves our table hungry.
                 </p>
                 <p>
-                  And finally, the best part: We’ll sit around the big wooden table to enjoy our meal together,
+                  And finally, the best part: We'll sit around the big wooden table to enjoy our meal together,
                   sharing stories and a glass of local wine.
                 </p>
               </div>
@@ -270,11 +264,6 @@ export default function CoursesContent() {
             <p className="text-lg text-[var(--color-charcoal-light)] max-w-2xl mx-auto">
               Approximately 4 hours of cooking, learning, and feasting
             </p>
-            {activeSlotLabel && (
-              <p className="text-sm text-[var(--color-charcoal-light)] mt-2">
-                Times shown for {activeSlotLabel}. Times may vary by month.
-              </p>
-            )}
           </motion.div>
 
           <div className="relative">
@@ -282,9 +271,9 @@ export default function CoursesContent() {
             <div className="absolute left-8 md:left-1/2 top-0 bottom-0 w-0.5 bg-[var(--color-primary)]/20 -translate-x-1/2 hidden md:block" />
 
             <div className="space-y-8">
-              {timeline.map((item, index) => (
+              {timelineTitles.map((item, index) => (
                 <motion.div
-                  key={item.time}
+                  key={index}
                   initial={{ opacity: 0, y: 20 }}
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true }}
@@ -296,9 +285,22 @@ export default function CoursesContent() {
                   <div className="md:w-1/2 md:text-right">
                     {index % 2 === 0 ? (
                       <div className="bg-white rounded-xl p-6 shadow-md">
-                        <p className="text-[var(--color-secondary)] font-bold mb-2">
-                          {item.time}
-                        </p>
+                        {hasMultipleSlots ? (
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2">
+                            {allTimelines.map((tl) => (
+                              <p key={tl.label} className="text-[var(--color-secondary)] font-bold text-sm">
+                                {tl.items[index].time}
+                                <span className="font-normal text-[var(--color-charcoal-light)] ml-1 text-xs">
+                                  ({tl.months})
+                                </span>
+                              </p>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[var(--color-secondary)] font-bold mb-2">
+                            {allTimelines[0]?.items[index]?.time}
+                          </p>
+                        )}
                         <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
                           {item.title}
                         </h3>
@@ -315,9 +317,22 @@ export default function CoursesContent() {
                   <div className="md:w-1/2">
                     {index % 2 !== 0 ? (
                       <div className="bg-white rounded-xl p-6 shadow-md">
-                        <p className="text-[var(--color-secondary)] font-bold mb-2">
-                          {item.time}
-                        </p>
+                        {hasMultipleSlots ? (
+                          <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2">
+                            {allTimelines.map((tl) => (
+                              <p key={tl.label} className="text-[var(--color-secondary)] font-bold text-sm">
+                                {tl.items[index].time}
+                                <span className="font-normal text-[var(--color-charcoal-light)] ml-1 text-xs">
+                                  ({tl.months})
+                                </span>
+                              </p>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="text-[var(--color-secondary)] font-bold mb-2">
+                            {allTimelines[0]?.items[index]?.time}
+                          </p>
+                        )}
                         <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
                           {item.title}
                         </h3>
@@ -330,9 +345,22 @@ export default function CoursesContent() {
 
                   {/* Mobile view */}
                   <div className="md:hidden bg-white rounded-xl p-6 shadow-md ml-8">
-                    <p className="text-[var(--color-secondary)] font-bold mb-2">
-                      {item.time}
-                    </p>
+                    {hasMultipleSlots ? (
+                      <div className="flex flex-wrap gap-x-4 gap-y-1 mb-2">
+                        {allTimelines.map((tl) => (
+                          <p key={tl.label} className="text-[var(--color-secondary)] font-bold text-sm">
+                            {tl.items[index].time}
+                            <span className="font-normal text-[var(--color-charcoal-light)] ml-1 text-xs">
+                              ({tl.months})
+                            </span>
+                          </p>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-[var(--color-secondary)] font-bold mb-2">
+                        {allTimelines[0]?.items[index]?.time}
+                      </p>
+                    )}
                     <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
                       {item.title}
                     </h3>

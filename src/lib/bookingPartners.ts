@@ -16,7 +16,7 @@ export const BOOKING_PARTNERS: BookingPartner[] = [
   },
   {
     name: "Eatwith",
-    url: "https://www.eatwith.com/events/46288?date=2026-04-20",
+    url: "https://www.eatwith.com/events/22470?date=2026-04-20",
     color: "#FF6B35",
     textColor: "#FFFFFF",
     iconUrl: "https://www.google.com/s2/favicons?domain=eatwith.com&sz=64",
