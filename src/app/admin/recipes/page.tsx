@@ -86,9 +86,10 @@ function SortableRow({
           <span>{recipe.title}</span>
           <div className="flex items-center gap-1 ml-2">
             <button
-              onClick={() => window.open(`/recipes/${recipe.id}`, "_blank")}
-              className="p-1.5 rounded hover:bg-gray-100 transition-colors"
-              title="View recipe"
+              onClick={() => recipe.published && window.open(`/recipes/${recipe.id}`, "_blank")}
+              className={`p-1.5 rounded transition-colors ${recipe.published ? "hover:bg-gray-100 cursor-pointer" : "cursor-not-allowed opacity-40"}`}
+              title={recipe.published ? "View recipe" : "Recipe not published"}
+              disabled={!recipe.published}
             >
               <ExternalLink className="w-4 h-4 text-gray-600" />
             </button>
