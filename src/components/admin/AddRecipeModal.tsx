@@ -413,7 +413,7 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
 
                 {/* Categories multi-select dropdown */}
                 <div ref={dropdownRef}>
-                  <label className="block text-sm font-medium mb-1">Categories *</label>
+                  <label className="block text-sm font-medium mb-1">Categories</label>
 
                   {/* Selected categories as pills */}
                   {categories.length > 0 && (
@@ -751,7 +751,7 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || categories.length === 0}
+                  disabled={isSubmitting}
                   className="flex-1 px-6 py-3 bg-[var(--color-primary)] text-white rounded-lg hover:bg-[var(--color-primary-dark)] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   {isSubmitting
