@@ -172,7 +172,10 @@ export async function PUT(
         mainPhotoFile.type
       );
       if (uploadedUrl) {
-        mainPhotoUrl = uploadedUrl;
+        // Append cache-busting param so browsers/CDN fetch the new image
+        const url = new URL(uploadedUrl);
+        url.searchParams.set('t', Date.now().toString());
+        mainPhotoUrl = url.toString();
       }
     } else if (removeMainPhoto === 'true') {
       mainPhotoUrl = '';
