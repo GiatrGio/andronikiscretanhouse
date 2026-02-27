@@ -200,9 +200,9 @@ export default function RecipeDetailContent({
                           {photos.length > 0 && (
                             <div
                               className={`grid gap-3 ${
-                                photos.length === 2
-                                  ? "grid-cols-2"
-                                  : "grid-cols-1"
+                                photos.length === 1
+                                  ? "grid-cols-1"
+                                  : "grid-cols-2"
                               }`}
                             >
                               {photos.map((photo, imgIndex) => (
