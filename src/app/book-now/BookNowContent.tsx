@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import { useForm, Controller, useWatch } from "react-hook-form";
-import { Clock, Send, Check, ExternalLink, AlertTriangle, Users } from "lucide-react";
+import { Clock, Send, Check, ExternalLink, AlertTriangle, Users, Euro } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import Input, { Textarea, Select } from "@/components/ui/Input";
@@ -259,6 +259,35 @@ export default function BookNowContent() {
             <h2 className="font-heading text-2xl md:text-3xl font-bold text-[var(--color-charcoal)] mb-6">
               Book Your Experience
             </h2>
+
+            {/* Pricing Info */}
+            {bookingPreferences && (
+              <div className="mb-8 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+                <div className="flex items-center gap-2 mb-2">
+                  <Euro className="w-5 h-5 text-[var(--color-primary)]" />
+                  <h3 className="font-heading text-lg font-bold text-[var(--color-charcoal)]">
+                    Price per Lesson + Dinner
+                  </h3>
+                </div>
+                <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-[var(--color-charcoal-light)]">
+                  <span>
+                    <span className="font-semibold text-[var(--color-charcoal)]">
+                      {(bookingPreferences.preferences.course_price_adult).toFixed(2).replace('.', ',')} €
+                    </span>{" "}
+                    per guest
+                  </span>
+                  <span>
+                    <span className="font-semibold text-[var(--color-charcoal)]">
+                      {(bookingPreferences.preferences.course_price_child).toFixed(2).replace('.', ',')} €
+                    </span>{" "}
+                    for children 6–12
+                  </span>
+                  <span>
+                    <span className="font-semibold text-[var(--color-charcoal)]">Free</span> for children under 6
+                  </span>
+                </div>
+              </div>
+            )}
 
             {status === "success" ? (
               <motion.div

@@ -25,6 +25,8 @@ export async function GET() {
             available_days: [0, 1, 2, 3, 4, 5, 6],
             default_spots: 8,
             monthly_time_slots: DEFAULT_TIME_SLOTS,
+            course_price_adult: 60,
+            course_price_child: 30,
             updated_at: new Date().toISOString(),
           },
         });
@@ -37,6 +39,8 @@ export async function GET() {
         ...data,
         default_spots: data.default_spots ?? 8,
         monthly_time_slots: data.monthly_time_slots ?? DEFAULT_TIME_SLOTS,
+        course_price_adult: data.course_price_adult ?? 60,
+        course_price_child: data.course_price_child ?? 30,
       },
     });
   } catch (error) {
@@ -61,6 +65,8 @@ export async function PUT(request: NextRequest) {
       available_days,
       default_spots,
       monthly_time_slots,
+      course_price_adult,
+      course_price_child,
     } = body;
 
     // Validate input
@@ -141,6 +147,8 @@ export async function PUT(request: NextRequest) {
         available_days,
         default_spots: spots,
         monthly_time_slots: monthly_time_slots ?? DEFAULT_TIME_SLOTS,
+        course_price_adult: typeof course_price_adult === 'number' ? course_price_adult : 60,
+        course_price_child: typeof course_price_child === 'number' ? course_price_child : 30,
         updated_at: new Date().toISOString(),
       })
       .select()

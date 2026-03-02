@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { X, Calendar as CalendarIcon, FileText, Plus, Clock } from "lucide-react";
+import { X, Calendar as CalendarIcon, FileText, Plus, Clock, Euro } from "lucide-react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import AdminHeader from "@/components/admin/AdminHeader";
@@ -63,6 +63,8 @@ export default function PreferencesPage() {
   const [availableDays, setAvailableDays] = useState<number[]>([0, 1, 2, 3, 4, 5, 6]);
   const [defaultSpots, setDefaultSpots] = useState(8);
   const [monthlyTimeSlots, setMonthlyTimeSlots] = useState<MonthlyTimeSlot[]>(DEFAULT_TIME_SLOTS);
+  const [coursePriceAdult, setCoursePriceAdult] = useState(60);
+  const [coursePriceChild, setCoursePriceChild] = useState(30);
 
   // Date overrides state
   const [dateOverrides, setDateOverrides] = useState<DateOverride[]>([]);
@@ -96,6 +98,8 @@ export default function PreferencesPage() {
         setAvailableDays(p.available_days);
         setDefaultSpots(p.default_spots ?? 8);
         setMonthlyTimeSlots(p.monthly_time_slots ?? DEFAULT_TIME_SLOTS);
+        setCoursePriceAdult(p.course_price_adult ?? 60);
+        setCoursePriceChild(p.course_price_child ?? 30);
       }
     } catch (error) {
       console.error("Error loading preferences:", error);
@@ -130,6 +134,8 @@ export default function PreferencesPage() {
           available_days: availableDays,
           default_spots: defaultSpots,
           monthly_time_slots: monthlyTimeSlots,
+          course_price_adult: coursePriceAdult,
+          course_price_child: coursePriceChild,
         }),
       });
 
@@ -582,6 +588,54 @@ export default function PreferencesPage() {
                 <Plus className="w-4 h-4" />
                 Add Time Period
               </button>
+            </div>
+          </div>
+
+          {/* Course Pricing */}
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h2 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-4 flex items-center gap-2">
+              <Euro className="w-5 h-5" />
+              Course Pricing
+            </h2>
+            <p className="text-sm text-[var(--color-charcoal-light)] mb-4">
+              Set the price per lesson including dinner. These prices are displayed on the Courses and Book Now pages.
+            </p>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-2">
+                  Adult Price (per guest)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={coursePriceAdult}
+                    onChange={(e) => setCoursePriceAdult(Math.max(0, parseFloat(e.target.value) || 0))}
+                    className="w-32 px-3 py-2 rounded-lg border border-gray-300 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:outline-none focus:ring-2"
+                  />
+                  <span className="text-sm text-[var(--color-charcoal-light)]">EUR</span>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-[var(--color-charcoal)] mb-2">
+                  Child Price (ages 6-12, per guest)
+                </label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="number"
+                    min={0}
+                    step={0.01}
+                    value={coursePriceChild}
+                    onChange={(e) => setCoursePriceChild(Math.max(0, parseFloat(e.target.value) || 0))}
+                    className="w-32 px-3 py-2 rounded-lg border border-gray-300 focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)] focus:outline-none focus:ring-2"
+                  />
+                  <span className="text-sm text-[var(--color-charcoal-light)]">EUR</span>
+                </div>
+                <p className="mt-1 text-xs text-gray-500">Children under 6 are free</p>
+              </div>
             </div>
           </div>
 

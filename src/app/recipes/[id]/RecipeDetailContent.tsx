@@ -307,7 +307,7 @@ export default function RecipeDetailContent({
                   >
                     <Link
                       href={`/recipes/${relatedRecipe.id}`}
-                      className="block bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
+                      className="flex flex-col h-full bg-white rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group"
                     >
                       <div className="relative aspect-[4/3] bg-[var(--color-primary)]/10 flex items-center justify-center">
                         {relatedRecipe.main_photo && !imageErrors.has(relatedRecipe.main_photo) ? (
@@ -325,7 +325,7 @@ export default function RecipeDetailContent({
                           <ChefHat className="w-12 h-12 text-[var(--color-primary)]/30 group-hover:scale-110 transition-transform" />
                         )}
                       </div>
-                      <div className="p-5">
+                      <div className="p-5 flex-1">
                         <h3 className="font-heading text-lg font-bold text-[var(--color-charcoal)] mb-2 group-hover:text-[var(--color-primary)] transition-colors">
                           {relatedRecipe.title}
                         </h3>

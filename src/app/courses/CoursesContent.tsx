@@ -7,7 +7,7 @@ import {
   Clock,
   Users,
   UtensilsCrossed,
-  Calendar,
+  Euro,
   CalendarCheck,
   Gift,
   Shirt,
@@ -20,26 +20,6 @@ import { COURSE_DETAILS } from "@/lib/constants";
 import type { MonthlyTimeSlot, Preferences } from "@/lib/types/preferences";
 import { DEFAULT_TIME_SLOTS, generateTimeline, formatMonthRange } from "@/lib/timeSlots";
 
-const MONTH_NAMES = [
-  "", "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-
-function formatDayOrdinal(day: number): string {
-  if (day >= 11 && day <= 13) return `${day}th`;
-  switch (day % 10) {
-    case 1: return `${day}st`;
-    case 2: return `${day}nd`;
-    case 3: return `${day}rd`;
-    default: return `${day}th`;
-  }
-}
-
-function formatSeasonFromPreferences(prefs: Preferences): string {
-  const start = `${MONTH_NAMES[prefs.season_start_month]} ${formatDayOrdinal(prefs.season_start_day)}`;
-  const end = `${MONTH_NAMES[prefs.season_end_month]} ${formatDayOrdinal(prefs.season_end_day)}`;
-  return `${start} to ${end}`;
-}
 
 const timelineTitles = [
   {
@@ -142,6 +122,32 @@ const goodToKnow = [
   },
 ];
 
+function ExpandableText({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const lines = text.split('\n');
+  const needsTruncation = lines.length > 2;
+
+  if (!needsTruncation) {
+    return <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">{text}</p>;
+  }
+
+  const truncated = lines.slice(0, 2).join('\n');
+
+  return (
+    <div>
+      <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">
+        {expanded ? text : truncated + '...'}
+      </p>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="mt-2 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors"
+      >
+        {expanded ? 'Show less' : 'Read more'}
+      </button>
+    </div>
+  );
+}
+
 export default function CoursesContent() {
   const [timeSlots, setTimeSlots] = useState<MonthlyTimeSlot[] | null>(null);
   const [preferences, setPreferences] = useState<Preferences | null>(null);
@@ -191,18 +197,15 @@ export default function CoursesContent() {
 
   const hasMultipleSlots = allTimelines.length > 1;
 
-  // Dynamic season string from preferences
-  const seasonValue = useMemo(() => {
-    if (preferences) return formatSeasonFromPreferences(preferences);
-    return COURSE_DETAILS.season;
-  }, [preferences]);
+  const adultPrice = preferences?.course_price_adult ?? 60;
+  const childPrice = preferences?.course_price_child ?? 30;
 
   const keyDetails = useMemo(() => [
     {
-      icon: Calendar,
-      title: "Season",
-      value: seasonValue,
-      description: "Classes run during the warm Cretan summer and early autumn",
+      icon: Euro,
+      title: "Course Price",
+      value: `${adultPrice.toFixed(2).replace('.', ',')} € per guest`,
+      description: `${childPrice.toFixed(2).replace('.', ',')} € for children 6–12, free under 6`,
     },
     {
       icon: Users,
@@ -222,7 +225,7 @@ export default function CoursesContent() {
       value: COURSE_DETAILS.bookingDeadline,
       description: "Please book at least 2 days in advance",
     },
-  ], [seasonValue]);
+  ], [adultPrice, childPrice]);
 
   return (
     <div className="bg-[var(--color-cream)]">
@@ -328,9 +331,7 @@ export default function CoursesContent() {
                         <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
                           {item.title}
                         </h3>
-                        <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">
-                          {item.description}
-                        </p>
+                        <ExpandableText text={item.description} />
                       </div>
                     ) : null}
                   </div>
@@ -360,9 +361,7 @@ export default function CoursesContent() {
                         <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
                           {item.title}
                         </h3>
-                        <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">
-                          {item.description}
-                        </p>
+                        <ExpandableText text={item.description} />
                       </div>
                     ) : null}
                   </div>

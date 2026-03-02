@@ -26,6 +26,8 @@ export async function GET() {
             available_days: [0, 1, 2, 3, 4, 5, 6],
             default_spots: 8,
             monthly_time_slots: DEFAULT_TIME_SLOTS,
+            course_price_adult: 60,
+            course_price_child: 30,
             updated_at: new Date().toISOString(),
           },
           dateOverrides: [],
@@ -60,6 +62,8 @@ export async function GET() {
         ...preferences,
         default_spots: defaultSpots,
         monthly_time_slots: preferences.monthly_time_slots ?? DEFAULT_TIME_SLOTS,
+        course_price_adult: preferences.course_price_adult ?? 60,
+        course_price_child: preferences.course_price_child ?? 30,
       },
       dateOverrides,
     });

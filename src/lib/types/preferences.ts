@@ -14,6 +14,8 @@ export interface Preferences {
   available_days: number[];
   default_spots: number;
   monthly_time_slots: MonthlyTimeSlot[];
+  course_price_adult: number;
+  course_price_child: number;
   updated_at: string;
 }
 
