@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
@@ -13,6 +14,7 @@ interface RecipesContentProps {
 }
 
 export default function RecipesContent({ recipes }: RecipesContentProps) {
+  const searchParams = useSearchParams();
   const [selectedCategory, setSelectedCategory] = useState("All");
 
   const categories = useMemo(() => {
@@ -20,6 +22,13 @@ export default function RecipesContent({ recipes }: RecipesContentProps) {
     recipes.forEach((r) => r.categories.forEach((c) => cats.add(c)));
     return ["All", ...Array.from(cats).sort()];
   }, [recipes]);
+
+  useEffect(() => {
+    const cat = searchParams.get("category");
+    if (cat && categories.includes(cat)) {
+      setSelectedCategory(cat);
+    }
+  }, [searchParams, categories]);
 
   const filteredRecipes =
     selectedCategory === "All"

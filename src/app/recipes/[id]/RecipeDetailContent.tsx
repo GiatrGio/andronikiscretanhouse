@@ -51,12 +51,13 @@ export default function RecipeDetailContent({
             {recipe.categories && recipe.categories.length > 0 && (
               <div className="flex flex-wrap gap-2 justify-end">
                 {recipe.categories.map((cat) => (
-                  <span
+                  <Link
                     key={cat}
-                    className="px-3 py-1 bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-sm font-medium rounded-full"
+                    href={`/recipes?category=${encodeURIComponent(cat)}`}
+                    className="px-3 py-1 bg-[var(--color-primary)]/10 text-[var(--color-primary)] text-sm font-medium rounded-full hover:bg-[var(--color-primary)] hover:text-white transition-colors"
                   >
                     {cat}
-                  </span>
+                  </Link>
                 ))}
               </div>
             )}
