@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import {
@@ -124,26 +124,41 @@ const goodToKnow = [
 
 function ExpandableText({ text }: { text: string }) {
   const [expanded, setExpanded] = useState(false);
-  const lines = text.split('\n');
-  const needsTruncation = lines.length > 2;
+  const [needsClamp, setNeedsClamp] = useState(false);
+  const textRef = useRef<HTMLParagraphElement>(null);
 
-  if (!needsTruncation) {
-    return <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">{text}</p>;
-  }
+  useEffect(() => {
+    const el = textRef.current;
+    if (!el || expanded) return;
 
-  const truncated = lines.slice(0, 2).join('\n');
+    const check = () => {
+      setNeedsClamp(el.scrollHeight > el.clientHeight + 1);
+    };
+
+    const observer = new ResizeObserver(check);
+    observer.observe(el);
+    check();
+    return () => observer.disconnect();
+  }, [text, expanded]);
 
   return (
     <div>
-      <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">
-        {expanded ? text : truncated + '...'}
-      </p>
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="mt-2 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors"
+      <p
+        ref={textRef}
+        className={`text-[var(--color-charcoal-light)] whitespace-pre-line ${
+          !expanded ? 'line-clamp-3' : ''
+        }`}
       >
-        {expanded ? 'Show less' : 'Read more'}
-      </button>
+        {text}
+      </p>
+      {(needsClamp || expanded) && (
+        <button
+          onClick={() => setExpanded(!expanded)}
+          className="mt-2 text-sm font-medium text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] transition-colors"
+        >
+          {expanded ? 'Show less' : 'Read more'}
+        </button>
+      )}
     </div>
   );
 }
@@ -309,7 +324,7 @@ export default function CoursesContent() {
                     index % 2 === 0 ? "md:flex-row-reverse" : ""
                   }`}
                 >
-                  <div className="md:w-1/2 md:text-right">
+                  <div className="hidden md:block md:w-1/2 md:text-right">
                     {index % 2 === 0 ? (
                       <div className="bg-white rounded-xl p-6 shadow-md">
                         {hasMultipleSlots ? (
@@ -339,7 +354,7 @@ export default function CoursesContent() {
                   {/* Timeline dot */}
                   <div className="absolute left-8 md:left-1/2 w-4 h-4 bg-[var(--color-primary)] rounded-full -translate-x-1/2 hidden md:block" />
 
-                  <div className="md:w-1/2">
+                  <div className="hidden md:block md:w-1/2">
                     {index % 2 !== 0 ? (
                       <div className="bg-white rounded-xl p-6 shadow-md">
                         {hasMultipleSlots ? (
@@ -387,9 +402,7 @@ export default function CoursesContent() {
                     <h3 className="font-heading text-xl font-bold text-[var(--color-charcoal)] mb-2">
                       {item.title}
                     </h3>
-                    <p className="text-[var(--color-charcoal-light)] whitespace-pre-line">
-                      {item.description}
-                    </p>
+                    <ExpandableText text={item.description} />
                   </div>
                 </motion.div>
               ))}
