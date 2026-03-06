@@ -261,14 +261,14 @@ export default function BookNowContent() {
             </h2>
 
             {/* Pricing Info */}
-            {bookingPreferences && (
-              <div className="mb-8 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
-                <div className="flex items-center gap-2 mb-2">
-                  <Euro className="w-5 h-5 text-[var(--color-primary)]" />
-                  <h3 className="font-heading text-lg font-bold text-[var(--color-charcoal)]">
-                    Price per Lesson + Dinner
-                  </h3>
-                </div>
+            <div className="mb-8 p-4 bg-white rounded-xl border border-gray-200 shadow-sm">
+              <div className="flex items-center gap-2 mb-2">
+                <Euro className="w-5 h-5 text-[var(--color-primary)]" />
+                <h3 className="font-heading text-lg font-bold text-[var(--color-charcoal)]">
+                  Price per Lesson + Dinner
+                </h3>
+              </div>
+              {bookingPreferences ? (
                 <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm text-[var(--color-charcoal-light)]">
                   <span>
                     <span className="font-semibold text-[var(--color-charcoal)]">
@@ -286,8 +286,14 @@ export default function BookNowContent() {
                     <span className="font-semibold text-[var(--color-charcoal)]">Free</span> for children under 6
                   </span>
                 </div>
-              </div>
-            )}
+              ) : (
+                <div className="flex flex-wrap gap-x-6 gap-y-1 text-sm">
+                  <span className="h-4 w-28 bg-gray-200 rounded animate-pulse" />
+                  <span className="h-4 w-36 bg-gray-200 rounded animate-pulse" />
+                  <span className="h-4 w-32 bg-gray-200 rounded animate-pulse" />
+                </div>
+              )}
+            </div>
 
             {status === "success" ? (
               <motion.div
@@ -628,13 +634,17 @@ export default function BookNowContent() {
                 Or book your experience through our partners
               </h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {BOOKING_PARTNERS.map((partner) => (
+                {BOOKING_PARTNERS.map((partner, index) => (
                   <a
                     key={partner.name}
                     href={partner.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="group relative overflow-hidden"
+                    className={`group relative overflow-hidden ${
+                      BOOKING_PARTNERS.length % 2 !== 0 && index === BOOKING_PARTNERS.length - 1
+                        ? "sm:col-span-2"
+                        : ""
+                    }`}
                   >
                     <div
                       className="relative h-16 flex items-center justify-center transform -skew-x-6 transition-all duration-200 hover:scale-105 hover:shadow-lg"

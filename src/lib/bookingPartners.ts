@@ -35,4 +35,11 @@ export const BOOKING_PARTNERS: BookingPartner[] = [
     textColor: "#FFFFFF",
     iconUrl: "https://www.google.com/s2/favicons?domain=viator.com&sz=64",
   },
+  {
+    name: "GetYourGuide",
+    url: "https://www.getyourguide.com/rethymno-l1808/dining-in-rethymno-an-evening-of-cretan-cooking-t500781/?ranking_uuid=4c16864d-6dc9-4e71-93e7-a7a21bfcdbb6&visitor-id=8QV8053CWG9OY71GLCVR41MZJ6NFT7J4&locale_autoredirect_optout=true",
+    color: "#FF5533",
+    textColor: "#FFFFFF",
+    iconUrl: "https://www.google.com/s2/favicons?domain=getyourguide.com&sz=64",
+  },
 ];

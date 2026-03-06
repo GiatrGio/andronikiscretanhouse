@@ -59,30 +59,30 @@ export default function QuickInfo() {
                   href={item.href}
                   target={item.isExternal ? "_blank" : undefined}
                   rel={item.isExternal ? "noopener noreferrer" : undefined}
-                  className="flex items-start gap-4 p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors group"
+                  className="flex items-start gap-4 p-4 rounded-xl bg-white/10 hover:bg-white/20 transition-colors group h-full"
                 >
                   <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0 group-hover:bg-white/30 transition-colors">
                     <item.icon className="w-6 h-6 text-white" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-white/70 text-sm font-medium mb-1">
                       {item.label}
                     </p>
-                    <p className="text-white font-medium leading-tight">
+                    <p className="text-white font-medium leading-tight break-all">
                       {item.value}
                     </p>
                   </div>
                 </a>
               ) : (
-                <div className="flex items-start gap-4 p-4 rounded-xl bg-white/10">
+                <div className="flex items-start gap-4 p-4 rounded-xl bg-white/10 h-full">
                   <div className="w-12 h-12 rounded-lg bg-white/20 flex items-center justify-center flex-shrink-0">
                     <item.icon className="w-6 h-6 text-white" />
                   </div>
-                  <div>
+                  <div className="min-w-0">
                     <p className="text-white/70 text-sm font-medium mb-1">
                       {item.label}
                     </p>
-                    <p className="text-white font-medium leading-tight">
+                    <p className="text-white font-medium leading-tight break-all">
                       {item.value}
                     </p>
                   </div>
