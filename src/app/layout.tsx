@@ -91,7 +91,7 @@ export default function RootLayout({
       <head>
         <LocalBusinessJsonLd />
         <CookingClassJsonLd />
-        <script defer src="https://umami-nine-roan.vercel.app/script.js" data-website-id="c381b828-d0fc-4567-9fb8-f526b1a581cf" />
+        <script defer src="https://umami-phi-bice.vercel.app/script.js" data-website-id="ce219938-75f9-434f-b80d-6ad4dc7e020f" />
       </head>
       <body className="antialiased min-h-screen flex flex-col">
         <Header />
