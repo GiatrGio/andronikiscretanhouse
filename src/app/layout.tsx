@@ -21,6 +21,9 @@ export const metadata: Metadata = {
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_SITE_URL || "https://andronikiscretanhouse.com"
   ),
+  verification: {
+    google: "XFofwDDpW4HbrJelvoYWkIj7yh-amDSmiKFA8EwI-QA",
+  },
   title: {
     default: "Androniki's Cretan House | Authentic Greek Cooking Classes in Rethymno",
     template: "%s | Androniki's Cretan House",
@@ -74,10 +77,6 @@ export const metadata: Metadata = {
   },
   alternates: {
     canonical: "/",
-  },
-  verification: {
-    // Add Google Search Console verification when available
-    // google: "your-google-verification-code",
   },
 };
 
