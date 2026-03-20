@@ -3,7 +3,6 @@ import { Playfair_Display, Inter } from "next/font/google";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import { LocalBusinessJsonLd, CookingClassJsonLd } from "@/components/StructuredData";
-import { Analytics } from "@vercel/analytics/react";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -92,12 +91,12 @@ export default function RootLayout({
       <head>
         <LocalBusinessJsonLd />
         <CookingClassJsonLd />
+        <script defer src="https://umami-phi-bice.vercel.app/script.js" data-website-id="ce219938-75f9-434f-b80d-6ad4dc7e020f" />
       </head>
       <body className="antialiased min-h-screen flex flex-col">
         <Header />
         <main className="flex-1">{children}</main>
         <Footer />
-        <Analytics />
       </body>
     </html>
   );
