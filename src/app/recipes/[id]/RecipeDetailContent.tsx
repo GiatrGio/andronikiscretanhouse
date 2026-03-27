@@ -170,7 +170,7 @@ export default function RecipeDetailContent({
                           className="flex items-start gap-3 text-[var(--color-charcoal-light)]"
                         >
                           <span className="w-2 h-2 rounded-full bg-[var(--color-secondary)] mt-2 flex-shrink-0" />
-                          <span>{item}</span>
+                          <span>{renderInstructionText(item)}</span>
                         </li>
                       ))}
                     </ul>

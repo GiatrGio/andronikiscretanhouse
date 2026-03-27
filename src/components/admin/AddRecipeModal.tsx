@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
-import { X, Plus, Trash2, ChevronDown, Link2 } from "lucide-react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import { X, Plus, Trash2, ChevronDown, Link2, Maximize2, Minimize2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Recipe, RecipeSummary } from "@/lib/constants";
 import { compressImage } from "@/lib/imageCompression";
@@ -58,11 +58,20 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
   const [existingMainPhoto, setExistingMainPhoto] = useState("");
   const [existingStepPhotos, setExistingStepPhotos] = useState<Record<number, string[]>>({});
 
+  // Autosave
+  const [showSavedToast, setShowSavedToast] = useState(false);
+  const isAutosaving = useRef(false);
+  const autosaveTimer = useRef<NodeJS.Timeout | null>(null);
+
+  // Expand textareas
+  const [expandedFields, setExpandedFields] = useState<Set<string>>(new Set());
+
   // Recipe linking
   const [allRecipes, setAllRecipes] = useState<RecipeSummary[]>([]);
   const [recipeLinkDropdown, setRecipeLinkDropdown] = useState<number | string | null>(null);
   const [recipeLinkSearch, setRecipeLinkSearch] = useState("");
   const instructionRefs = useRef<Record<number, HTMLTextAreaElement | null>>({});
+  const ingredientRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const summaryRef = useRef<HTMLTextAreaElement | null>(null);
   const recipeLinkDropdownRef = useRef<HTMLDivElement>(null);
 
@@ -184,31 +193,49 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
     setInstructions(updated);
   };
 
-  // Recipe link insertion — works for both instruction steps (number) and summary ("summary")
-  const insertRecipeLink = (target: number | "summary", recipe: RecipeSummary) => {
-    const textarea = target === "summary" ? summaryRef.current : instructionRefs.current[target];
+  // Recipe link insertion — works for instruction steps (number), summary ("summary"), and ingredients ("ingredient-G-I")
+  const insertRecipeLink = (target: number | string, recipe: RecipeSummary) => {
     const linkText = `[${recipe.title}](/recipes/${recipe.id})`;
+    const isIngredient = typeof target === "string" && target.startsWith("ingredient-");
 
-    const getCurrentText = () => target === "summary" ? summary : instructions[target].text;
+    const getInput = (): HTMLTextAreaElement | HTMLInputElement | null => {
+      if (target === "summary") return summaryRef.current;
+      if (isIngredient) return ingredientRefs.current[target] || null;
+      return instructionRefs.current[target as number] || null;
+    };
+
+    const getCurrentText = () => {
+      if (target === "summary") return summary;
+      if (isIngredient) {
+        const [, gi, ii] = target.split("-").map(Number);
+        return ingredientGroups[gi]?.items[ii] ?? "";
+      }
+      return instructions[target as number].text;
+    };
+
     const setText = (newText: string) => {
       if (target === "summary") {
         setSummary(newText);
+      } else if (isIngredient) {
+        const [, gi, ii] = target.split("-").map(Number);
+        updateIngredientItem(gi, ii, newText);
       } else {
-        updateInstructionText(target, newText);
+        updateInstructionText(target as number, newText);
       }
     };
 
-    if (textarea) {
-      const start = textarea.selectionStart;
-      const end = textarea.selectionEnd;
+    const input = getInput();
+    if (input) {
+      const start = input.selectionStart ?? getCurrentText().length;
+      const end = input.selectionEnd ?? start;
       const currentText = getCurrentText();
       const newText = currentText.substring(0, start) + linkText + currentText.substring(end);
       setText(newText);
 
       setTimeout(() => {
-        textarea.focus();
+        input.focus();
         const newPos = start + linkText.length;
-        textarea.setSelectionRange(newPos, newPos);
+        input.setSelectionRange(newPos, newPos);
       }, 0);
     } else {
       const currentText = getCurrentText();
@@ -295,59 +322,117 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-
-    try {
-      const formData = new FormData();
-
-      // Add basic fields
-      formData.append("title", title);
-      formData.append("summary", summary);
-      formData.append("categories", JSON.stringify(categories));
-
-      // Add main photo (compressed)
-      if (mainPhoto) {
-        const compressedMain = await compressImage(mainPhoto);
-        formData.append("mainPhoto", compressedMain);
+  // Toggle expand/collapse for a textarea field
+  const toggleExpand = (fieldKey: string) => {
+    setExpandedFields(prev => {
+      const next = new Set(prev);
+      if (next.has(fieldKey)) {
+        next.delete(fieldKey);
+      } else {
+        next.add(fieldKey);
       }
+      return next;
+    });
+  };
 
-      // Signal main photo removal in edit mode
-      if (editMode && !existingMainPhoto && !mainPhoto) {
-        formData.append("removeMainPhoto", "true");
-      }
+  // Build FormData for saving (reused by submit and autosave)
+  const buildFormData = async ({ includePhotos }: { includePhotos: boolean }) => {
+    const formData = new FormData();
 
-      // Add ingredients
-      formData.append("ingredients", JSON.stringify(
-        ingredientGroups.map(g => ({
-          ...(g.group && { group: g.group }),
-          items: g.items.filter(item => item.trim() !== "")
-        })).filter(g => g.items.length > 0)
-      ));
+    formData.append("title", title);
+    formData.append("summary", summary);
+    formData.append("categories", JSON.stringify(categories));
 
-      // Add instructions with photos
-      const instructionsData = instructions.filter(inst => inst.text.trim() !== "");
-      formData.append("instructionsText", JSON.stringify(instructionsData.map(inst => ({
-        step: inst.step,
-        text: inst.text
-      }))));
+    if (includePhotos && mainPhoto) {
+      const compressedMain = await compressImage(mainPhoto);
+      formData.append("mainPhoto", compressedMain);
+    }
 
-      // Add instruction photos (compressed)
+    if (editMode && !existingMainPhoto && !mainPhoto) {
+      formData.append("removeMainPhoto", "true");
+    }
+
+    formData.append("ingredients", JSON.stringify(
+      ingredientGroups.map(g => ({
+        ...(g.group && { group: g.group }),
+        items: g.items.filter(item => item.trim() !== "")
+      })).filter(g => g.items.length > 0)
+    ));
+
+    const instructionsData = instructions.filter(inst => inst.text.trim() !== "");
+    formData.append("instructionsText", JSON.stringify(instructionsData.map(inst => ({
+      step: inst.step,
+      text: inst.text
+    }))));
+
+    if (includePhotos) {
       for (const inst of instructionsData) {
         for (let photoIndex = 0; photoIndex < inst.photos.length; photoIndex++) {
           const compressed = await compressImage(inst.photos[photoIndex]);
           formData.append(`instruction_${inst.step}_photo_${photoIndex}`, compressed);
         }
-        // Send existing step photos to keep
-        if (editMode) {
-          const kept = existingStepPhotos[inst.step] || [];
-          formData.append(`existingStepPhotos_${inst.step}`, JSON.stringify(kept));
-        }
       }
+    }
 
-      // Add tips
-      formData.append("tips_and_notes", JSON.stringify(tips.filter(tip => tip.trim() !== "")));
+    if (editMode) {
+      for (const inst of instructionsData) {
+        const kept = existingStepPhotos[inst.step] || [];
+        formData.append(`existingStepPhotos_${inst.step}`, JSON.stringify(kept));
+      }
+    }
+
+    formData.append("tips_and_notes", JSON.stringify(tips.filter(tip => tip.trim() !== "")));
+
+    return formData;
+  };
+
+  // Autosave (edit mode only) — save text fields every 10 seconds
+  const performAutosave = useCallback(async () => {
+    if (!editMode || !recipeId || isAutosaving.current || isSubmitting) return;
+    isAutosaving.current = true;
+    try {
+      const formData = await buildFormData({ includePhotos: false });
+      const response = await fetch(`/api/admin/recipes/${recipeId}`, {
+        method: "PUT",
+        body: formData,
+      });
+      if (response.ok) {
+        setShowSavedToast(true);
+        setTimeout(() => setShowSavedToast(false), 2000);
+      }
+    } catch {
+      // Silent fail for autosave
+    } finally {
+      isAutosaving.current = false;
+    }
+  }, [editMode, recipeId, isSubmitting, title, summary, categories, ingredientGroups, instructions, existingStepPhotos, existingMainPhoto, mainPhoto, tips]);
+
+  useEffect(() => {
+    if (editMode && isOpen && !isLoading) {
+      autosaveTimer.current = setInterval(() => {
+        performAutosave();
+      }, 10000);
+    }
+    return () => {
+      if (autosaveTimer.current) {
+        clearInterval(autosaveTimer.current);
+        autosaveTimer.current = null;
+      }
+    };
+  }, [editMode, isOpen, isLoading, performAutosave]);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    // Stop autosave while submitting
+    if (autosaveTimer.current) {
+      clearInterval(autosaveTimer.current);
+      autosaveTimer.current = null;
+    }
+
+    try {
+      const formData = await buildFormData({ includePhotos: true });
 
       const url = editMode ? `/api/admin/recipes/${recipeId}` : "/api/admin/recipes";
       const method = editMode ? "PUT" : "POST";
@@ -414,12 +499,26 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
               <h2 className="font-heading text-2xl font-bold text-[var(--color-charcoal)]">
                 {editMode ? "Edit Recipe" : "Add New Recipe"}
               </h2>
-              <button
-                onClick={onClose}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X className="w-5 h-5" />
-              </button>
+              <div className="flex items-center gap-3">
+                <AnimatePresence>
+                  {showSavedToast && (
+                    <motion.span
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      className="text-sm font-medium text-green-600"
+                    >
+                      Progress Saved
+                    </motion.span>
+                  )}
+                </AnimatePresence>
+                <button
+                  onClick={onClose}
+                  className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                >
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Form */}
@@ -450,15 +549,25 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium mb-1">Summary *</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-sm font-medium">Summary *</label>
+                    <button
+                      type="button"
+                      onClick={() => toggleExpand("summary")}
+                      className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs text-gray-500 hover:text-[var(--color-primary)] hover:bg-gray-100 rounded transition-colors"
+                      title={expandedFields.has("summary") ? "Collapse" : "Expand"}
+                    >
+                      {expandedFields.has("summary") ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+                    </button>
+                  </div>
                   <textarea
                     ref={summaryRef}
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
                     required
-                    rows={3}
+                    rows={expandedFields.has("summary") ? 10 : 3}
                     placeholder="Recipe summary — use the link button to insert recipe links"
-                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                    className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all"
                   />
                   <div className="relative" ref={recipeLinkDropdown === "summary" ? recipeLinkDropdownRef : undefined}>
                     <button
@@ -659,24 +768,76 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                       )}
                     </div>
 
-                    {group.items.map((item, itemIndex) => (
-                      <div key={itemIndex} className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={item}
-                          onChange={(e) => updateIngredientItem(groupIndex, itemIndex, e.target.value)}
-                          placeholder="Ingredient"
-                          className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => removeIngredientItem(groupIndex, itemIndex)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </div>
-                    ))}
+                    {group.items.map((item, itemIndex) => {
+                      const ingredientKey = `ingredient-${groupIndex}-${itemIndex}`;
+                      return (
+                        <div key={itemIndex} className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <input
+                              ref={(el) => { ingredientRefs.current[ingredientKey] = el; }}
+                              type="text"
+                              value={item}
+                              onChange={(e) => updateIngredientItem(groupIndex, itemIndex, e.target.value)}
+                              placeholder="Ingredient — use the link button to insert recipe links"
+                              className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => removeIngredientItem(groupIndex, itemIndex)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
+                          <div className="relative" ref={recipeLinkDropdown === ingredientKey ? recipeLinkDropdownRef : undefined}>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setRecipeLinkDropdown(recipeLinkDropdown === ingredientKey ? null : ingredientKey);
+                                setRecipeLinkSearch("");
+                              }}
+                              className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded transition-colors"
+                            >
+                              <Link2 className="w-3 h-3" />
+                              Link Recipe
+                            </button>
+                            {recipeLinkDropdown === ingredientKey && (
+                              <div className="absolute left-0 top-full mt-1 w-72 bg-white border rounded-lg shadow-lg z-30 max-h-60 overflow-hidden flex flex-col">
+                                <div className="p-2 border-b">
+                                  <input
+                                    type="text"
+                                    value={recipeLinkSearch}
+                                    onChange={(e) => setRecipeLinkSearch(e.target.value)}
+                                    placeholder="Search recipes..."
+                                    className="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                                    autoFocus
+                                  />
+                                </div>
+                                <div className="overflow-y-auto">
+                                  {allRecipes
+                                    .filter(r => editMode ? r.id !== recipeId : true)
+                                    .filter(r => !recipeLinkSearch || r.title.toLowerCase().includes(recipeLinkSearch.toLowerCase()))
+                                    .map(r => (
+                                      <button
+                                        key={r.id}
+                                        type="button"
+                                        onClick={() => insertRecipeLink(ingredientKey, r)}
+                                        className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--color-primary)]/10 transition-colors"
+                                      >
+                                        {r.title}
+                                      </button>
+                                    ))
+                                  }
+                                  {allRecipes.filter(r => editMode ? r.id !== recipeId : true).filter(r => !recipeLinkSearch || r.title.toLowerCase().includes(recipeLinkSearch.toLowerCase())).length === 0 && (
+                                    <p className="px-3 py-2 text-sm text-gray-500">No recipes found</p>
+                                  )}
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
 
                     <button
                       type="button"
@@ -711,13 +872,23 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                         {instruction.step}
                       </span>
                       <div className="flex-1 space-y-1">
+                        <div className="flex justify-end">
+                          <button
+                            type="button"
+                            onClick={() => toggleExpand(`instruction-${index}`)}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 text-xs text-gray-500 hover:text-[var(--color-primary)] hover:bg-gray-100 rounded transition-colors"
+                            title={expandedFields.has(`instruction-${index}`) ? "Collapse" : "Expand"}
+                          >
+                            {expandedFields.has(`instruction-${index}`) ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
+                          </button>
+                        </div>
                         <textarea
                           ref={(el) => { instructionRefs.current[index] = el; }}
                           value={instruction.text}
                           onChange={(e) => updateInstructionText(index, e.target.value)}
                           placeholder="Instruction text — use the link button to insert recipe links"
-                          rows={2}
-                          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                          rows={expandedFields.has(`instruction-${index}`) ? 10 : 2}
+                          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent transition-all"
                         />
                         <div className="relative" ref={recipeLinkDropdown === index ? recipeLinkDropdownRef : undefined}>
                           <button
