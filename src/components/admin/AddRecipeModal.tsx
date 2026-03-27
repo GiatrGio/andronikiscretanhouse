@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { X, Plus, Trash2, ChevronDown } from "lucide-react";
+import { X, Plus, Trash2, ChevronDown, Link2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Recipe } from "@/lib/constants";
+import { Recipe, RecipeSummary } from "@/lib/constants";
 import { compressImage } from "@/lib/imageCompression";
 
 interface AddRecipeModalProps {
@@ -58,27 +58,41 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
   const [existingMainPhoto, setExistingMainPhoto] = useState("");
   const [existingStepPhotos, setExistingStepPhotos] = useState<Record<number, string[]>>({});
 
-  // Fetch existing categories from recipes
+  // Recipe linking
+  const [allRecipes, setAllRecipes] = useState<RecipeSummary[]>([]);
+  const [recipeLinkDropdown, setRecipeLinkDropdown] = useState<number | string | null>(null);
+  const [recipeLinkSearch, setRecipeLinkSearch] = useState("");
+  const instructionRefs = useRef<Record<number, HTMLTextAreaElement | null>>({});
+  const summaryRef = useRef<HTMLTextAreaElement | null>(null);
+  const recipeLinkDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Fetch existing categories and recipes list
   useEffect(() => {
     if (isOpen) {
       fetch('/api/admin/recipes')
         .then(res => res.json())
         .then(data => {
+          const recipes = data.recipes || [];
           const allCats = new Set<string>();
-          (data.recipes || []).forEach((r: { categories?: string[] }) => {
+          recipes.forEach((r: { categories?: string[] }) => {
             (r.categories || []).forEach((c: string) => allCats.add(c));
           });
           setExistingCategories(Array.from(allCats).sort());
+          setAllRecipes(recipes);
         })
         .catch(() => {});
     }
   }, [isOpen]);
 
-  // Close dropdown on outside click
+  // Close dropdowns on outside click
   useEffect(() => {
     function handleClick(e: MouseEvent) {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node)) {
         setIsCategoryDropdownOpen(false);
+      }
+      if (recipeLinkDropdownRef.current && !recipeLinkDropdownRef.current.contains(e.target as Node)) {
+        setRecipeLinkDropdown(null);
+        setRecipeLinkSearch("");
       }
     }
     document.addEventListener("mousedown", handleClick);
@@ -168,6 +182,41 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
     const updated = [...instructions];
     updated[stepIndex].photos = updated[stepIndex].photos.filter((_, i) => i !== photoIndex);
     setInstructions(updated);
+  };
+
+  // Recipe link insertion — works for both instruction steps (number) and summary ("summary")
+  const insertRecipeLink = (target: number | "summary", recipe: RecipeSummary) => {
+    const textarea = target === "summary" ? summaryRef.current : instructionRefs.current[target];
+    const linkText = `[${recipe.title}](/recipes/${recipe.id})`;
+
+    const getCurrentText = () => target === "summary" ? summary : instructions[target].text;
+    const setText = (newText: string) => {
+      if (target === "summary") {
+        setSummary(newText);
+      } else {
+        updateInstructionText(target, newText);
+      }
+    };
+
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const currentText = getCurrentText();
+      const newText = currentText.substring(0, start) + linkText + currentText.substring(end);
+      setText(newText);
+
+      setTimeout(() => {
+        textarea.focus();
+        const newPos = start + linkText.length;
+        textarea.setSelectionRange(newPos, newPos);
+      }, 0);
+    } else {
+      const currentText = getCurrentText();
+      setText(currentText + (currentText ? " " : "") + linkText);
+    }
+
+    setRecipeLinkDropdown(null);
+    setRecipeLinkSearch("");
   };
 
   // Tips handlers
@@ -403,12 +452,60 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                 <div>
                   <label className="block text-sm font-medium mb-1">Summary *</label>
                   <textarea
+                    ref={summaryRef}
                     value={summary}
                     onChange={(e) => setSummary(e.target.value)}
                     required
                     rows={3}
+                    placeholder="Recipe summary — use the link button to insert recipe links"
                     className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
                   />
+                  <div className="relative" ref={recipeLinkDropdown === "summary" ? recipeLinkDropdownRef : undefined}>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRecipeLinkDropdown(recipeLinkDropdown === "summary" ? null : "summary");
+                        setRecipeLinkSearch("");
+                      }}
+                      className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded transition-colors"
+                    >
+                      <Link2 className="w-3 h-3" />
+                      Link Recipe
+                    </button>
+                    {recipeLinkDropdown === "summary" && (
+                      <div className="absolute left-0 top-full mt-1 w-72 bg-white border rounded-lg shadow-lg z-30 max-h-60 overflow-hidden flex flex-col">
+                        <div className="p-2 border-b">
+                          <input
+                            type="text"
+                            value={recipeLinkSearch}
+                            onChange={(e) => setRecipeLinkSearch(e.target.value)}
+                            placeholder="Search recipes..."
+                            className="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                            autoFocus
+                          />
+                        </div>
+                        <div className="overflow-y-auto">
+                          {allRecipes
+                            .filter(r => editMode ? r.id !== recipeId : true)
+                            .filter(r => !recipeLinkSearch || r.title.toLowerCase().includes(recipeLinkSearch.toLowerCase()))
+                            .map(r => (
+                              <button
+                                key={r.id}
+                                type="button"
+                                onClick={() => insertRecipeLink("summary", r)}
+                                className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--color-primary)]/10 transition-colors"
+                              >
+                                {r.title}
+                              </button>
+                            ))
+                          }
+                          {allRecipes.filter(r => editMode ? r.id !== recipeId : true).filter(r => !recipeLinkSearch || r.title.toLowerCase().includes(recipeLinkSearch.toLowerCase())).length === 0 && (
+                            <p className="px-3 py-2 text-sm text-gray-500">No recipes found</p>
+                          )}
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 {/* Categories multi-select dropdown */}
@@ -613,13 +710,62 @@ export default function AddRecipeModal({ isOpen, onClose, onSuccess, editMode = 
                       <span className="flex-shrink-0 w-8 h-8 rounded-full bg-[var(--color-primary)] text-white flex items-center justify-center text-sm font-bold mt-1">
                         {instruction.step}
                       </span>
-                      <textarea
-                        value={instruction.text}
-                        onChange={(e) => updateInstructionText(index, e.target.value)}
-                        placeholder="Instruction text"
-                        rows={2}
-                        className="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
-                      />
+                      <div className="flex-1 space-y-1">
+                        <textarea
+                          ref={(el) => { instructionRefs.current[index] = el; }}
+                          value={instruction.text}
+                          onChange={(e) => updateInstructionText(index, e.target.value)}
+                          placeholder="Instruction text — use the link button to insert recipe links"
+                          rows={2}
+                          className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                        />
+                        <div className="relative" ref={recipeLinkDropdown === index ? recipeLinkDropdownRef : undefined}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setRecipeLinkDropdown(recipeLinkDropdown === index ? null : index);
+                              setRecipeLinkSearch("");
+                            }}
+                            className="inline-flex items-center gap-1 px-2 py-1 text-xs text-[var(--color-primary)] hover:bg-[var(--color-primary)]/10 rounded transition-colors"
+                          >
+                            <Link2 className="w-3 h-3" />
+                            Link Recipe
+                          </button>
+                          {recipeLinkDropdown === index && (
+                            <div className="absolute left-0 top-full mt-1 w-72 bg-white border rounded-lg shadow-lg z-30 max-h-60 overflow-hidden flex flex-col">
+                              <div className="p-2 border-b">
+                                <input
+                                  type="text"
+                                  value={recipeLinkSearch}
+                                  onChange={(e) => setRecipeLinkSearch(e.target.value)}
+                                  placeholder="Search recipes..."
+                                  className="w-full px-2 py-1 border rounded text-sm focus:ring-2 focus:ring-[var(--color-primary)] focus:border-transparent"
+                                  autoFocus
+                                />
+                              </div>
+                              <div className="overflow-y-auto">
+                                {allRecipes
+                                  .filter(r => editMode ? r.id !== recipeId : true)
+                                  .filter(r => !recipeLinkSearch || r.title.toLowerCase().includes(recipeLinkSearch.toLowerCase()))
+                                  .map(r => (
+                                    <button
+                                      key={r.id}
+                                      type="button"
+                                      onClick={() => insertRecipeLink(index, r)}
+                                      className="w-full text-left px-3 py-2 text-sm hover:bg-[var(--color-primary)]/10 transition-colors"
+                                    >
+                                      {r.title}
+                                    </button>
+                                  ))
+                                }
+                                {allRecipes.filter(r => editMode ? r.id !== recipeId : true).filter(r => !recipeLinkSearch || r.title.toLowerCase().includes(recipeLinkSearch.toLowerCase())).length === 0 && (
+                                  <p className="px-3 py-2 text-sm text-gray-500">No recipes found</p>
+                                )}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                       {instructions.length > 1 && (
                         <button
                           type="button"
