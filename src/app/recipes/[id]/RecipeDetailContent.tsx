@@ -26,6 +26,39 @@ export default function RecipeDetailContent({
   const [lightboxImage, setLightboxImage] = useState<string | null>(null);
   const [imageErrors, setImageErrors] = useState<Set<string>>(new Set());
 
+  // Parse markdown-style recipe links [text](/recipes/ID) into clickable links
+  const renderInstructionText = (text: string) => {
+    const linkRegex = /\[([^\]]+)\]\((\/recipes\/\d+)\)/g;
+    const parts: (string | React.ReactElement)[] = [];
+    let lastIndex = 0;
+    let match;
+
+    while ((match = linkRegex.exec(text)) !== null) {
+      // Add text before the link
+      if (match.index > lastIndex) {
+        parts.push(text.substring(lastIndex, match.index));
+      }
+      // Add the link
+      parts.push(
+        <Link
+          key={match.index}
+          href={match[2]}
+          className="text-[var(--color-primary)] hover:text-[var(--color-primary-dark)] underline underline-offset-2 font-medium transition-colors"
+        >
+          {match[1]}
+        </Link>
+      );
+      lastIndex = match.index + match[0].length;
+    }
+
+    // Add remaining text
+    if (lastIndex < text.length) {
+      parts.push(text.substring(lastIndex));
+    }
+
+    return parts.length > 0 ? parts : text;
+  };
+
   return (
     <div className="bg-[var(--color-cream)] min-h-screen">
       {/* Hero Section with Image */}
@@ -98,7 +131,7 @@ export default function RecipeDetailContent({
               {recipe.title}
             </h1>
             <p className="text-lg text-[var(--color-charcoal-light)] max-w-2xl mx-auto">
-              {recipe.summary}
+              {renderInstructionText(recipe.summary)}
             </p>
           </motion.div>
         </div>
@@ -195,7 +228,7 @@ export default function RecipeDetailContent({
                         <div className="flex-1">
                           {text && (
                             <p className="text-[var(--color-charcoal-light)] leading-relaxed pt-1 mb-3">
-                              {text}
+                              {renderInstructionText(text)}
                             </p>
                           )}
                           {photos.length > 0 && (
