@@ -48,7 +48,6 @@ export default function HeroSection({
             fill
             className="object-cover"
             priority
-            quality={90}
           />
         </div>
       ) : (
