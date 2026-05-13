@@ -2,6 +2,7 @@ import { createAdminClient } from './admin';
 
 const BUCKET_NAME = 'recipe-images';
 const GALLERY_BUCKET_NAME = 'gallery-images';
+const IMAGE_CACHE_CONTROL_SECONDS = '2678400';
 
 export async function uploadImage(
   file: File,
@@ -12,7 +13,7 @@ export async function uploadImage(
   const { data, error } = await supabase.storage
     .from(BUCKET_NAME)
     .upload(path, file, {
-      cacheControl: '3600',
+      cacheControl: IMAGE_CACHE_CONTROL_SECONDS,
       upsert: true,
     });
 
@@ -39,7 +40,7 @@ export async function uploadImageFromBuffer(
   const { data, error } = await supabase.storage
     .from(BUCKET_NAME)
     .upload(path, buffer, {
-      cacheControl: '3600',
+      cacheControl: IMAGE_CACHE_CONTROL_SECONDS,
       upsert: true,
       contentType,
     });
@@ -119,7 +120,7 @@ export async function uploadGalleryImage(
   const { data, error } = await supabase.storage
     .from(GALLERY_BUCKET_NAME)
     .upload(path, buffer, {
-      cacheControl: '3600',
+      cacheControl: IMAGE_CACHE_CONTROL_SECONDS,
       upsert: true,
       contentType,
     });
